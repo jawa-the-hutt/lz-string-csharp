@@ -302,8 +302,7 @@ namespace lz_string_csharp
                         numBits++;
                     }
 
-
-                    if (dictionary.ElementAtOrDefault((int)c) != null) // if (dictionary[c] ) <------- original Javascript Equivalant
+                    if (dictionary.Count - 1 >= c) // if (dictionary[c] ) <------- original Javascript Equivalant
                     {
                         entry = dictionary[c];
                     }
