@@ -232,7 +232,7 @@ namespace lz_string_csharp
             int enlargeIn = 4;
             int numBits = 3;
             string entry = "";
-            string result = "";
+            StringBuilder result = new StringBuilder();
             int i = 0;
             dynamic w = "";
             dynamic c = "";
@@ -265,7 +265,8 @@ namespace lz_string_csharp
                 }
 
                 dictionary.Add(c);
-                w = result = c;
+                result.Append(c);
+                w = result.ToString();
 
                 while (true)
                 {
@@ -292,7 +293,7 @@ namespace lz_string_csharp
 
                             break;
                         case 2:
-                            return result;
+                            return result.ToString();
                     }
 
                     if (enlargeIn == 0)
@@ -301,8 +302,7 @@ namespace lz_string_csharp
                         numBits++;
                     }
 
-
-                    if (dictionary.ElementAtOrDefault((int)c) != null) // if (dictionary[c] ) <------- original Javascript Equivalant
+                    if (dictionary.Count - 1 >= c) // if (dictionary[c] ) <------- original Javascript Equivalant
                     {
                         entry = dictionary[c];
                     }
@@ -318,7 +318,7 @@ namespace lz_string_csharp
                         }
                     }
 
-                    result += entry;
+                    result.Append(entry);
                     dictionary.Add(w + entry[0]);
                     enlargeIn--;
                     w = entry;
