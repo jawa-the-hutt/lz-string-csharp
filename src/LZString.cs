@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
-
+using System.IO;
 
 namespace lz_string_csharp
 {
@@ -526,18 +526,12 @@ namespace lz_string_csharp
 
         public static string compressToBase64(string input)
         {
-
-            string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-            string output = "";
+string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
             // later in the function.  .Net doesn't have a similar function for regular integers.
             double chr1, chr2, chr3 = 0.0;
-
-            int enc1 = 0;
-            int enc2 = 0;
-            int enc3 = 0;
-            int enc4 = 0;
+            
             int i = 0;
 
             try
@@ -546,75 +540,77 @@ namespace lz_string_csharp
                     throw new Exception("input is Null");
 
                 input = compress(input);
-
-                while (i < input.Length * 2)
+                using (var ms = new MemoryStream(input.Length*2))
                 {
-                    if (i % 2 == 0)
+                    var sw = new StreamWriter(ms);
+
+                    while (i < input.Length*2)
                     {
-                        chr1 = (int)input[i / 2] >> 8;
-                        chr2 = (int)input[i / 2] & 255;
-                        if (i / 2 + 1 < input.Length)
-                            chr3 = (int)input[i / 2 + 1] >> 8;
-                        else
-                            chr3 = double.NaN;//chr3 = NaN; <------ original Javascript Equivalent
-                    }
-                    else
-                    {
-                        chr1 = (int)input[(i - 1) / 2] & 255;
-                        if ((i + 1) / 2 < input.Length)
+                        if (i%2 == 0)
                         {
-                            chr2 = (int)input[(i + 1) / 2] >> 8;
-                            chr3 = (int)input[(i + 1) / 2] & 255;
+                            chr1 = input[i/2] >> 8;
+                            chr2 = input[i/2] & 255;
+                            if (i/2 + 1 < input.Length)
+                                chr3 = input[i/2 + 1] >> 8;
+                            else
+                                chr3 = double.NaN; //chr3 = NaN; <------ original Javascript Equivalent
                         }
                         else
                         {
-                            chr2 = chr3 = double.NaN; // chr2 = chr3 = NaN; <------ original Javascript Equivalent
+                            chr1 = input[(i - 1)/2] & 255;
+                            if ((i + 1)/2 < input.Length)
+                            {
+                                chr2 = input[(i + 1)/2] >> 8;
+                                chr3 = input[(i + 1)/2] & 255;
+                            }
+                            else
+                            {
+                                chr2 = double.NaN;
+                                chr3 = double.NaN;
+                                // chr2 = chr3 = NaN; <------ original Javascript Equivalent
+                            }
                         }
+                        i += 3;
+                        
+                        int enc1 = ((int)Math.Floor(chr1)) >> 2;
+
+                        // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
+                        // assigned to 'double.NaN' above.  The orginal Javascript functions didn't need these checks due to how
+                        // Javascript functions.
+                        // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type 
+                        // conversion to get the 'enc' variables to be the correct value.
+                        int enc2 = !double.IsNaN(chr2)
+                            ? ((((int) Math.Floor(chr1)) & 3) << 4) | (((int) Math.Floor(chr2)) >> 4)
+                            : 0;
+
+                        int enc3 = 0;
+                        if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
+                        {
+                            enc3 = ((((int)Math.Floor(chr2)) & 15) << 2) | (((int)Math.Floor(chr3)) >> 6);
+                        }
+                        else if (double.IsNaN(chr2)) //if (isNaN(chr2)) <------ original Javascript Equivalent
+                        {
+                            enc3 = 64;
+                        }
+
+                        int enc4 = !double.IsNaN(chr3) ? ((int)Math.Floor(chr3)) & 63 : 64;
+                        
+                        sw.Write(_keyStr[enc1]);
+                        sw.Write(_keyStr[enc2]);
+                        sw.Write(_keyStr[enc3]);
+                        sw.Write(_keyStr[enc4]);
                     }
-                    i += 3;
+                    sw.Flush();
 
-
-                    enc1 = (int)(Math.Round(chr1)) >> 2;
-
-                    // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
-                    // assigned to 'double.NaN' above.  The orginal Javascript functions didn't need these checks due to how
-                    // Javascript functions.
-                    // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type 
-                    // conversion to get the 'enc' variables to be the correct value.
-                    if (!double.IsNaN(chr2))
-                    {
-                        enc2 = (((int)(Math.Round(chr1)) & 3) << 4) | ((int)(Math.Round(chr2)) >> 4);
-                    }
-
-                    if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
-                    {
-                        enc3 = (((int)(Math.Round(chr2)) & 15) << 2) | ((int)(Math.Round(chr3)) >> 6);
-                    }
-
-                    if (!double.IsNaN(chr3))
-                    {
-
-                        enc4 = (int)(Math.Round(chr3)) & 63;
-                    }
-
-                    if (double.IsNaN(chr2)) //if (isNaN(chr2)) <------ original Javascript Equivalent
-                    {
-                        enc3 = enc4 = 64;
-                    }
-                    else if (double.IsNaN(chr3)) //else if (isNaN(chr3)) <------ original Javascript Equivalent
-                    {
-                        enc4 = 64;
-                    }
-
-                    output = output + _keyStr[enc1] + _keyStr[enc2] + _keyStr[enc3] + _keyStr[enc4];
+                    ms.Position = 0;
+                    var sr = new StreamReader(ms);
+                    return sr.ReadToEnd();
                 }
             }
             catch (Exception ex)
             {
                 return ex.Message;
             }
-
-            return output;
         }
 
         public static string decompressFromBase64(string input)
