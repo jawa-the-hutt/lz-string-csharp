@@ -619,10 +619,8 @@ namespace lz_string_csharp
 
         public static string decompressFromBase64(string input)
         {
-
             string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-            string output = "";
             int output_ = 0;
             int ol = 0;
             int chr1, chr2, chr3 = 0;
@@ -637,6 +635,7 @@ namespace lz_string_csharp
                 var regex = new Regex(@"[^A-Za-z0-9-\+\/\=]");
                 input = regex.Replace(input, "");
 
+                var sb = new StringBuilder();
                 while (i < input.Length)
                 {
                     enc1 = _keyStr.IndexOf(input[i++]);
@@ -648,13 +647,13 @@ namespace lz_string_csharp
                     chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
                     chr3 = ((enc3 & 3) << 6) | enc4;
 
-                    if (ol % 2 == 0)
+                    if (ol%2 == 0)
                     {
                         output_ = chr1 << 8;
 
                         if (enc3 != 64)
                         {
-                            output += (char)(output_ | chr2);
+                            sb.Append((char) (output_ | chr2));
                         }
 
                         if (enc4 != 64)
@@ -664,7 +663,7 @@ namespace lz_string_csharp
                     }
                     else
                     {
-                        output = output + (char)(output_ | chr1);
+                        sb.Append((char) (output_ | chr1));
 
                         if (enc3 != 64)
                         {
@@ -672,25 +671,19 @@ namespace lz_string_csharp
                         }
                         if (enc4 != 64)
                         {
-                            output += (char)(output_ | chr3);
+                            sb.Append((char) (output_ | chr3));
                         }
                     }
                     ol += 3;
                 }
 
                 // Send the output out to the main decompress function
-                output = decompress(output);
+                return decompress(sb.ToString());
             }
             catch (Exception ex)
             {
                 return ex.Message;
             }
-
-            return output;
         }
-
-
-
     }
-
 }
