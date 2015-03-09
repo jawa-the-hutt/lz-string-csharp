@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 
 namespace lz_string_csharp
 {
-    public class LZString
+       public class LZString
     {
 
         private class Context_Compress
@@ -177,7 +176,7 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
 
             return context.data.str;
@@ -232,10 +231,11 @@ namespace lz_string_csharp
             int enlargeIn = 4;
             int numBits = 3;
             string entry = "";
-            string result = "";
+            StringBuilder result = new StringBuilder(); 
             int i = 0;
-            dynamic w = "";
-            dynamic c = "";
+            string w = "";
+            string sc = "";
+            int c = 0;
             int errorCount = 0;
 
             data.str = compressed;
@@ -255,22 +255,24 @@ namespace lz_string_csharp
                 switch (next)
                 {
                     case 0:
-                        c = Convert.ToChar(readBits(8, data)).ToString();
+                        sc = Convert.ToChar(readBits(8, data)).ToString();
                         break;
                     case 1:
-                        c = Convert.ToChar(readBits(16, data)).ToString();
+                        sc = Convert.ToChar(readBits(16, data)).ToString();
                         break;
                     case 2:
                         return "";
                 }
 
-                dictionary.Add(c);
-                w = result = c;
+                dictionary.Add(sc);
+
+                result.Append(sc);
+                w = result.ToString();
 
                 while (true)
                 {
                     c = readBits(numBits, data);
-                    int cc = (int)(c);
+                    int cc = c;
 
                     switch (cc)
                     {
@@ -278,21 +280,21 @@ namespace lz_string_csharp
                             if (errorCount++ > 10000)
                                 throw new Exception("To many errors");
 
-                            c = Convert.ToChar(readBits(8, data)).ToString();
-                            dictionary.Add(c);
+                            sc = Convert.ToChar(readBits(8, data)).ToString();
+                            dictionary.Add(sc);
                             c = dictionary.Count - 1;
                             enlargeIn--;
 
                             break;
                         case 1:
-                            c = Convert.ToChar(readBits(16, data)).ToString();
-                            dictionary.Add(c);
+                            sc = Convert.ToChar(readBits(16, data)).ToString();
+                            dictionary.Add(sc);
                             c = dictionary.Count - 1;
                             enlargeIn--;
 
                             break;
                         case 2:
-                            return result;
+                            return result.ToString();
                     }
 
                     if (enlargeIn == 0)
@@ -301,8 +303,7 @@ namespace lz_string_csharp
                         numBits++;
                     }
 
-
-                    if (dictionary.ElementAtOrDefault((int)c) != null) // if (dictionary[c] ) <------- original Javascript Equivalant
+                    if (dictionary.Count - 1 >= c) // if (dictionary[c] ) <------- original Javascript Equivalant
                     {
                         entry = dictionary[c];
                     }
@@ -318,7 +319,7 @@ namespace lz_string_csharp
                         }
                     }
 
-                    result += entry;
+                    result.Append(entry);
                     dictionary.Add(w + entry[0]);
                     enlargeIn--;
                     w = entry;
@@ -332,7 +333,7 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -423,7 +424,7 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
 
             return output + (char)(current + 32);
@@ -518,7 +519,7 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
 
             return decompress(output);
@@ -531,7 +532,7 @@ namespace lz_string_csharp
             string output = "";
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
-            // later in the function.  .Net doesn't have a similar function for regular integers.
+            // later in the function. .Net doesn't have a similar function for regular integers.
             double chr1, chr2, chr3 = 0.0;
 
             int enc1 = 0;
@@ -577,9 +578,9 @@ namespace lz_string_csharp
                     enc1 = (int)(Math.Round(chr1)) >> 2;
 
                     // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
-                    // assigned to 'double.NaN' above.  The orginal Javascript functions didn't need these checks due to how
+                    // assigned to 'double.NaN' above. The orginal Javascript functions didn't need these checks due to how
                     // Javascript functions.
-                    // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type 
+                    // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type
                     // conversion to get the 'enc' variables to be the correct value.
                     if (!double.IsNaN(chr2))
                     {
@@ -589,6 +590,11 @@ namespace lz_string_csharp
                     if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
                     {
                         enc3 = (((int)(Math.Round(chr2)) & 15) << 2) | ((int)(Math.Round(chr3)) >> 6);
+                    }
+                    // added per issue #3 logged by ReuvenT
+                    else 
+                    {
+                        enc3 = 0;
                     }
 
                     if (!double.IsNaN(chr3))
@@ -611,7 +617,7 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
 
             return output;
@@ -683,13 +689,11 @@ namespace lz_string_csharp
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                throw ex;
             }
 
             return output;
         }
-
-
 
     }
 
