@@ -120,15 +120,15 @@ namespace lz_string_csharp
 
             context.Data = data;
 
-            for (int i = 0; i < uncompressed.Length; i++)
+            foreach (char c in uncompressed)
             {
-                context.C = uncompressed[i].ToString();
+                context.C = c.ToString();
 
                 if (!context.Dictionary.ContainsKey(context.C))
                 {
                     context.Dictionary[context.C] = context.DictSize++;
                     context.DictionaryToCreate[context.C] = true;
-                };
+                }
 
                 context.Wc = context.W + context.C;
 
@@ -223,7 +223,7 @@ namespace lz_string_csharp
             int errorCount = 0;
 
             data.Str = compressed;
-            data.Val = (int)compressed[0];
+            data.Val = compressed[0];
             data.Position = 32768;
             data.Index = 1;
 
@@ -330,7 +330,7 @@ namespace lz_string_csharp
 
             for (int i = 0; i < input.Length; i++)
             {
-                int c = (int)input[i];
+                int c = input[i];
                 switch (status++)
                 {
                     case 0:
@@ -412,7 +412,7 @@ namespace lz_string_csharp
 
             while (i < input.Length)
             {
-                int c = ((int)input[i]) - 32;
+                int c = input[i] - 32;
 
                 switch (status++)
                 {
@@ -511,20 +511,20 @@ namespace lz_string_csharp
             {
                 if (i % 2 == 0)
                 {
-                    chr1 = (int)input[i / 2] >> 8;
-                    chr2 = (int)input[i / 2] & 255;
+                    chr1 = input[i / 2] >> 8;
+                    chr2 = input[i / 2] & 255;
                     if (i / 2 + 1 < input.Length)
-                        chr3 = (int)input[i / 2 + 1] >> 8;
+                        chr3 = input[i / 2 + 1] >> 8;
                     else
                         chr3 = double.NaN;//chr3 = NaN; <------ original Javascript Equivalent
                 }
                 else
                 {
-                    chr1 = (int)input[(i - 1) / 2] & 255;
+                    chr1 = input[(i - 1) / 2] & 255;
                     if ((i + 1) / 2 < input.Length)
                     {
-                        chr2 = (int)input[(i + 1) / 2] >> 8;
-                        chr3 = (int)input[(i + 1) / 2] & 255;
+                        chr2 = input[(i + 1) / 2] >> 8;
+                        chr3 = input[(i + 1) / 2] & 255;
                     }
                     else
                     {
@@ -578,9 +578,10 @@ namespace lz_string_csharp
 
         public static string DecompressFromBase64(string input)
         {
-            string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
             string output = "";
+            // ReSharper disable once InconsistentNaming
             int output_ = 0;
             int ol = 0;
             int chr1, chr2, chr3 = 0;
