@@ -20,37 +20,37 @@ namespace lz_string_csharp_tests
         [TestCaseSource(nameof(TestCases))]
         public void Compress(LZStringTestCase test)
         {
-            Assert.That(LZString.compress(test.Uncompressed), Is.EqualTo(test.Compressed));
+            Assert.That(LZString.Compress(test.Uncompressed), Is.EqualTo(test.Compressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
         public void Decompress(LZStringTestCase test)
         {
-            Assert.That(LZString.decompress(test.Compressed), Is.EqualTo(test.Uncompressed));
+            Assert.That(LZString.Decompress(test.Compressed), Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
         public void CompressToBase64(LZStringTestCase test)
         {
-            Assert.That(LZString.compressToBase64(test.Uncompressed), Is.EqualTo(test.CompressedBase64));
+            Assert.That(LZString.CompressToBase64(test.Uncompressed), Is.EqualTo(test.CompressedBase64));
         }
 
         [TestCaseSource(nameof(TestCases))]
         public void DecompressFromBase64(LZStringTestCase test)
         {
-            Assert.That(LZString.decompressFromBase64(test.CompressedBase64), Is.EqualTo(test.Uncompressed));
+            Assert.That(LZString.DecompressFromBase64(test.CompressedBase64), Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
         public void CompressToUTF16(LZStringTestCase test)
         {
-            Assert.That(LZString.compressToUTF16(test.Uncompressed), Is.EqualTo(test.CompressedUTF16));
+            Assert.That(LZString.CompressToUTF16(test.Uncompressed), Is.EqualTo(test.CompressedUTF16));
         }
 
         [TestCaseSource(nameof(TestCases))]
         public void DecompressFromUTF16(LZStringTestCase test)
         {
-            Assert.That(LZString.decompressFromUTF16(test.CompressedUTF16), Is.EqualTo(test.Uncompressed));
+            Assert.That(LZString.DecompressFromUTF16(test.CompressedUTF16), Is.EqualTo(test.Uncompressed));
         }
 
         public struct LZStringTestCase

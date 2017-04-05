@@ -7,191 +7,191 @@ namespace lz_string_csharp
 {
     public class LZString
     {
-        private class Context_Compress
+        private class ContextCompress
         {
-            public Dictionary<string, int> dictionary { get; set; }
-            public Dictionary<string, bool> dictionaryToCreate { get; set; }
-            public string c { get; set; }
-            public string wc { get; set; }
-            public string w { get; set; }
-            public int enlargeIn { get; set; }
-            public int dictSize { get; set; }
-            public int numBits { get; set; }
-            public Context_Compress_Data data { get; set; }
+            public Dictionary<string, int> Dictionary { get; set; }
+            public Dictionary<string, bool> DictionaryToCreate { get; set; }
+            public string C { get; set; }
+            public string Wc { get; set; }
+            public string W { get; set; }
+            public int EnlargeIn { get; set; }
+            public int DictSize { get; set; }
+            public int NumBits { get; set; }
+            public ContextCompressData Data { get; set; }
         }
 
-        private class Context_Compress_Data
+        private class ContextCompressData
         {
-            public string str { get; set; }
-            public int val { get; set; }
-            public int position { get; set; }
+            public string Str { get; set; }
+            public int Val { get; set; }
+            public int Position { get; set; }
         }
 
-        private class Decompress_Data
+        private class DecompressData
         {
-            public string str { get; set; }
-            public int val { get; set; }
-            public int position { get; set; }
-            public int index { get; set; }
+            public string Str { get; set; }
+            public int Val { get; set; }
+            public int Position { get; set; }
+            public int Index { get; set; }
         }
 
-        private static Context_Compress_Data writeBit(int value, Context_Compress_Data data)
+        private static ContextCompressData WriteBit(int value, ContextCompressData data)
         {
-            data.val = (data.val << 1) | value;
+            data.Val = (data.Val << 1) | value;
 
-            if (data.position == 15)
+            if (data.Position == 15)
             {
-                data.position = 0;
-                data.str += (char)data.val;
-                data.val = 0;
+                data.Position = 0;
+                data.Str += (char)data.Val;
+                data.Val = 0;
             }
             else
-                data.position++;
+                data.Position++;
 
             return data;
         }
 
-        private static Context_Compress_Data writeBits(int numbits, int value, Context_Compress_Data data)
+        private static ContextCompressData WriteBits(int numbits, int value, ContextCompressData data)
         {
             for (var i = 0; i < numbits; i++)
             {
-                data = writeBit(value & 1, data);
+                data = WriteBit(value & 1, data);
                 value = value >> 1;
             }
 
             return data;
         }
 
-        private static Context_Compress produceW(Context_Compress context)
+        private static ContextCompress ProduceW(ContextCompress context)
         {
-            if (context.dictionaryToCreate.ContainsKey(context.w))
+            if (context.DictionaryToCreate.ContainsKey(context.W))
             {
-                if (context.w[0] < 256)
+                if (context.W[0] < 256)
                 {
-                    context.data = writeBits(context.numBits, 0, context.data);
-                    context.data = writeBits(8, context.w[0], context.data);
+                    context.Data = WriteBits(context.NumBits, 0, context.Data);
+                    context.Data = WriteBits(8, context.W[0], context.Data);
                 }
                 else
                 {
-                    context.data = writeBits(context.numBits, 1, context.data);
-                    context.data = writeBits(16, context.w[0], context.data);
+                    context.Data = WriteBits(context.NumBits, 1, context.Data);
+                    context.Data = WriteBits(16, context.W[0], context.Data);
                 }
 
-                context = decrementEnlargeIn(context);
-                context.dictionaryToCreate.Remove(context.w);
+                context = DecrementEnlargeIn(context);
+                context.DictionaryToCreate.Remove(context.W);
             }
             else
             {
-                context.data = writeBits(context.numBits, context.dictionary[context.w], context.data);
+                context.Data = WriteBits(context.NumBits, context.Dictionary[context.W], context.Data);
             }
 
             return context;
         }
 
-        private static Context_Compress decrementEnlargeIn(Context_Compress context)
+        private static ContextCompress DecrementEnlargeIn(ContextCompress context)
         {
 
-            context.enlargeIn--;
-            if (context.enlargeIn == 0)
+            context.EnlargeIn--;
+            if (context.EnlargeIn == 0)
             {
-                context.enlargeIn = (int)Math.Pow(2, context.numBits);
-                context.numBits++;
+                context.EnlargeIn = (int)Math.Pow(2, context.NumBits);
+                context.NumBits++;
             }
             return context;
         }
 
-        public static string compress(string uncompressed)
+        public static string Compress(string uncompressed)
         {
-            Context_Compress context = new Context_Compress();
-            Context_Compress_Data data = new Context_Compress_Data();
+            ContextCompress context = new ContextCompress();
+            ContextCompressData data = new ContextCompressData();
 
-            context.dictionary = new Dictionary<string, int>();
-            context.dictionaryToCreate = new Dictionary<string, bool>();
-            context.c = "";
-            context.wc = "";
-            context.w = "";
-            context.enlargeIn = 2;
-            context.dictSize = 3;
-            context.numBits = 2;
+            context.Dictionary = new Dictionary<string, int>();
+            context.DictionaryToCreate = new Dictionary<string, bool>();
+            context.C = "";
+            context.Wc = "";
+            context.W = "";
+            context.EnlargeIn = 2;
+            context.DictSize = 3;
+            context.NumBits = 2;
 
-            data.str = "";
-            data.val = 0;
-            data.position = 0;
+            data.Str = "";
+            data.Val = 0;
+            data.Position = 0;
 
-            context.data = data;
+            context.Data = data;
 
             for (int i = 0; i < uncompressed.Length; i++)
             {
-                context.c = uncompressed[i].ToString();
+                context.C = uncompressed[i].ToString();
 
-                if (!context.dictionary.ContainsKey(context.c))
+                if (!context.Dictionary.ContainsKey(context.C))
                 {
-                    context.dictionary[context.c] = context.dictSize++;
-                    context.dictionaryToCreate[context.c] = true;
+                    context.Dictionary[context.C] = context.DictSize++;
+                    context.DictionaryToCreate[context.C] = true;
                 };
 
-                context.wc = context.w + context.c;
+                context.Wc = context.W + context.C;
 
-                if (context.dictionary.ContainsKey(context.wc))
+                if (context.Dictionary.ContainsKey(context.Wc))
                 {
-                    context.w = context.wc;
+                    context.W = context.Wc;
                 }
                 else
                 {
-                    context = produceW(context);
-                    context = decrementEnlargeIn(context);
-                    context.dictionary[context.wc] = context.dictSize++;
-                    context.w = context.c;
+                    context = ProduceW(context);
+                    context = DecrementEnlargeIn(context);
+                    context.Dictionary[context.Wc] = context.DictSize++;
+                    context.W = context.C;
                 }
             }
 
-            if (context.w != "")
+            if (context.W != "")
             {
-                context = produceW(context);
+                context = ProduceW(context);
             }
 
             // Mark the end of the stream
-            context.data = writeBits(context.numBits, 2, context.data);
+            context.Data = WriteBits(context.NumBits, 2, context.Data);
 
             // Flush the last char
             while (true)
             {
-                context.data.val = (context.data.val << 1);
-                if (context.data.position == 15)
+                context.Data.Val = (context.Data.Val << 1);
+                if (context.Data.Position == 15)
                 {
-                    context.data.str += (char)context.data.val;
+                    context.Data.Str += (char)context.Data.Val;
                     break;
                 }
                 else
-                    context.data.position++;
+                    context.Data.Position++;
             }
 
-            return context.data.str;
+            return context.Data.Str;
         }
 
-        private static int readBit(Decompress_Data data)
+        private static int ReadBit(DecompressData data)
         {
-            var res = data.val & data.position;
+            var res = data.Val & data.Position;
 
-            data.position >>= 1;
+            data.Position >>= 1;
 
-            if (data.position == 0)
+            if (data.Position == 0)
             {
-                data.position = 32768;
+                data.Position = 32768;
 
                 // This 'if' check doesn't appear in the orginal lz-string javascript code.
                 // Added as a check to make sure we don't exceed the length of data.str
                 // The javascript charCodeAt will return a NaN if it exceeds the index but will not error out
-                if (data.index < data.str.Length)
+                if (data.Index < data.Str.Length)
                 {
-                    data.val = data.str[data.index++]; // data.val = data.string.charCodeAt(data.index++); <---javascript equivilant
+                    data.Val = data.Str[data.Index++]; // data.val = data.string.charCodeAt(data.index++); <---javascript equivilant
                 }
             }
 
             return res > 0 ? 1 : 0;
         }
 
-        private static int readBits(int numBits, Decompress_Data data)
+        private static int ReadBits(int numBits, DecompressData data)
         {
             int res = 0;
             int maxpower = (int)Math.Pow(2, numBits);
@@ -199,16 +199,16 @@ namespace lz_string_csharp
 
             while (power != maxpower)
             {
-                res |= readBit(data) * power;
+                res |= ReadBit(data) * power;
                 power <<= 1;
             }
 
             return res;
         }
 
-        public static string decompress(string compressed)
+        public static string Decompress(string compressed)
         {
-            Decompress_Data data = new Decompress_Data();
+            DecompressData data = new DecompressData();
 
             List<string> dictionary = new List<string>();
             int next = 0;
@@ -222,25 +222,25 @@ namespace lz_string_csharp
             int c = 0;
             int errorCount = 0;
 
-            data.str = compressed;
-            data.val = (int)compressed[0];
-            data.position = 32768;
-            data.index = 1;
+            data.Str = compressed;
+            data.Val = (int)compressed[0];
+            data.Position = 32768;
+            data.Index = 1;
 
             for (i = 0; i < 3; i++)
             {
                 dictionary.Add(i.ToString());
             }
 
-            next = readBits(2, data);
+            next = ReadBits(2, data);
 
             switch (next)
             {
                 case 0:
-                    sc = Convert.ToChar(readBits(8, data)).ToString();
+                    sc = Convert.ToChar(ReadBits(8, data)).ToString();
                     break;
                 case 1:
-                    sc = Convert.ToChar(readBits(16, data)).ToString();
+                    sc = Convert.ToChar(ReadBits(16, data)).ToString();
                     break;
                 case 2:
                     return "";
@@ -253,7 +253,7 @@ namespace lz_string_csharp
 
             while (true)
             {
-                c = readBits(numBits, data);
+                c = ReadBits(numBits, data);
                 int cc = c;
 
                 switch (cc)
@@ -262,14 +262,14 @@ namespace lz_string_csharp
                         if (errorCount++ > 10000)
                             throw new Exception("To many errors");
 
-                        sc = Convert.ToChar(readBits(8, data)).ToString();
+                        sc = Convert.ToChar(ReadBits(8, data)).ToString();
                         dictionary.Add(sc);
                         c = dictionary.Count - 1;
                         enlargeIn--;
 
                         break;
                     case 1:
-                        sc = Convert.ToChar(readBits(16, data)).ToString();
+                        sc = Convert.ToChar(ReadBits(16, data)).ToString();
                         dictionary.Add(sc);
                         c = dictionary.Count - 1;
                         enlargeIn--;
@@ -314,7 +314,7 @@ namespace lz_string_csharp
             }
         }
 
-        public static string compressToUTF16(string input)
+        public static string CompressToUTF16(string input)
         {
 
             string output = "";
@@ -324,7 +324,7 @@ namespace lz_string_csharp
             if (input == null)
                 throw new Exception("Input is Null");
 
-            input = compress(input);
+            input = Compress(input);
             if (input.Length == 0)
                 return input;
 
@@ -400,7 +400,7 @@ namespace lz_string_csharp
             return output + (char)(current + 32);
         }
 
-        public static string decompressFromUTF16(string input)
+        public static string DecompressFromUTF16(string input)
         {
             string output = "";
             int status = 0;
@@ -484,12 +484,12 @@ namespace lz_string_csharp
                 i++;
             }
 
-            return decompress(output);
+            return Decompress(output);
         }
 
-        public static string compressToBase64(string input)
+        public static string CompressToBase64(string input)
         {
-            string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
             string output = "";
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
@@ -505,7 +505,7 @@ namespace lz_string_csharp
             if (input == null)
                 throw new Exception("input is Null");
 
-            input = compress(input);
+            input = Compress(input);
 
             while (i < input.Length * 2)
             {
@@ -570,15 +570,15 @@ namespace lz_string_csharp
                     enc4 = 64;
                 }
 
-                output = output + _keyStr[enc1] + _keyStr[enc2] + _keyStr[enc3] + _keyStr[enc4];
+                output = output + keyStr[enc1] + keyStr[enc2] + keyStr[enc3] + keyStr[enc4];
             }
 
             return output;
         }
 
-        public static string decompressFromBase64(string input)
+        public static string DecompressFromBase64(string input)
         {
-            string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
             string output = "";
             int output_ = 0;
@@ -595,10 +595,10 @@ namespace lz_string_csharp
 
             while (i < input.Length)
             {
-                enc1 = _keyStr.IndexOf(input[i++]);
-                enc2 = _keyStr.IndexOf(input[i++]);
-                enc3 = _keyStr.IndexOf(input[i++]);
-                enc4 = _keyStr.IndexOf(input[i++]);
+                enc1 = keyStr.IndexOf(input[i++]);
+                enc2 = keyStr.IndexOf(input[i++]);
+                enc3 = keyStr.IndexOf(input[i++]);
+                enc4 = keyStr.IndexOf(input[i++]);
 
                 chr1 = (enc1 << 2) | (enc2 >> 4);
                 chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
@@ -635,7 +635,7 @@ namespace lz_string_csharp
             }
 
             // Send the output out to the main decompress function
-            output = decompress(output);
+            output = Decompress(output);
 
             return output;
         }
