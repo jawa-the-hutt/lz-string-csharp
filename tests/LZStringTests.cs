@@ -10,10 +10,20 @@ namespace lz_string_csharp_tests
         {
             yield return new LZStringTestCase
             {
+                Name = "Json",
                 Uncompressed = "{ \"key\": \"value\" }",
                 Compressed = "㞀⁄ൠꘉ츁렐쀶ղ顀张",
                 CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA==",
                 CompressedUTF16 = "ᯠ࠱ǌ઀佐᝘ΐრᬢ峆ࠫ爠"
+            };
+
+            yield return new LZStringTestCase
+            {
+                Name = "UTF-8 String",
+                Uncompressed = "ユニコード",
+                Compressed = "駃⚘操ಃ錌䀀",
+                CompressedBase64 = "mcMmmGTNDIPwyJMMQAA=",
+                CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ "
             };
         }
 
@@ -55,10 +65,12 @@ namespace lz_string_csharp_tests
 
         public struct LZStringTestCase
         {
+            public string Name;
             public string Uncompressed;
             public string Compressed;
             public string CompressedBase64;
             public string CompressedUTF16;
+            public override string ToString() => Name;
         }
     }
 }
