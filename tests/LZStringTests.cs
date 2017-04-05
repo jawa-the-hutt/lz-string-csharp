@@ -12,7 +12,7 @@ namespace lz_string_csharp_tests
             {
                 Uncompressed = "{ \"key\": \"value\" }",
                 Compressed = "㞀⁄ൠꘉ츁렐쀶ղ顀张",
-                CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIE==",
+                CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA==",
                 CompressedUTF16 = "ᯠ࠱ǌ઀佐᝘ΐრᬢ峆ࠫ爠"
             };
         }
