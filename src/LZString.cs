@@ -492,7 +492,7 @@ namespace lz_string_csharp
         public static string CompressToBase64(string input)
         {
             const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-            string output = "";
+            StringBuilder output = new StringBuilder();
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
             // later in the function. .Net doesn't have a similar function for regular integers.
@@ -573,17 +573,20 @@ namespace lz_string_csharp
                     enc4 = 64;
                 }
 
-                output = output + keyStr[enc1] + keyStr[enc2] + keyStr[enc3] + keyStr[enc4];
+                output.Append(keyStr[enc1]);
+                output.Append(keyStr[enc2]);
+                output.Append(keyStr[enc3]);
+                output.Append(keyStr[enc4]);
             }
 
-            return output;
+            return output.ToString();
         }
 
         public static string DecompressFromBase64(string input)
         {
             const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-            string output = "";
+            StringBuilder output = new StringBuilder();
             // ReSharper disable once InconsistentNaming
             int output_ = 0;
             int ol = 0;
@@ -614,7 +617,7 @@ namespace lz_string_csharp
 
                     if (enc3 != 64)
                     {
-                        output += (char)(output_ | chr2);
+                        output.Append((char)(output_ | chr2));
                     }
 
                     if (enc4 != 64)
@@ -624,7 +627,7 @@ namespace lz_string_csharp
                 }
                 else
                 {
-                    output = output + (char)(output_ | chr1);
+                    output.Append((char)(output_ | chr1));
 
                     if (enc3 != 64)
                     {
@@ -632,16 +635,14 @@ namespace lz_string_csharp
                     }
                     if (enc4 != 64)
                     {
-                        output += (char)(output_ | chr3);
+                        output.Append((char)(output_ | chr3));
                     }
                 }
                 ol += 3;
             }
 
             // Send the output out to the main decompress function
-            output = Decompress(output);
-
-            return output;
+            return Decompress(output.ToString());
         }
     }
 }
