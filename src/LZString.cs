@@ -316,8 +316,7 @@ namespace lz_string_csharp
 
         public static string CompressToUTF16(string input)
         {
-
-            string output = "";
+            StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
 
@@ -334,75 +333,76 @@ namespace lz_string_csharp
                 switch (status++)
                 {
                     case 0:
-                        output += (char)((c >> 1) + 32);
+                        output.Append((char)((c >> 1) + 32));
                         current = (c & 1) << 14;
                         break;
                     case 1:
-                        output += (char)((current + (c >> 2)) + 32);
+                        output.Append((char)((current + (c >> 2)) + 32));
                         current = (c & 3) << 13;
                         break;
                     case 2:
-                        output += (char)((current + (c >> 3)) + 32);
+                        output.Append((char)((current + (c >> 3)) + 32));
                         current = (c & 7) << 12;
                         break;
                     case 3:
-                        output += (char)((current + (c >> 4)) + 32);
+                        output.Append((char)((current + (c >> 4)) + 32));
                         current = (c & 15) << 11;
                         break;
                     case 4:
-                        output += (char)((current + (c >> 5)) + 32);
+                        output.Append((char)((current + (c >> 5)) + 32));
                         current = (c & 31) << 10;
                         break;
                     case 5:
-                        output += (char)((current + (c >> 6)) + 32);
+                        output.Append((char)((current + (c >> 6)) + 32));
                         current = (c & 63) << 9;
                         break;
                     case 6:
-                        output += (char)((current + (c >> 7)) + 32);
+                        output.Append((char)((current + (c >> 7)) + 32));
                         current = (c & 127) << 8;
                         break;
                     case 7:
-                        output += (char)((current + (c >> 8)) + 32);
+                        output.Append((char)((current + (c >> 8)) + 32));
                         current = (c & 255) << 7;
                         break;
                     case 8:
-                        output += (char)((current + (c >> 9)) + 32);
+                        output.Append((char)((current + (c >> 9)) + 32));
                         current = (c & 511) << 6;
                         break;
                     case 9:
-                        output += (char)((current + (c >> 10)) + 32);
+                        output.Append((char)((current + (c >> 10)) + 32));
                         current = (c & 1023) << 5;
                         break;
                     case 10:
-                        output += (char)((current + (c >> 11)) + 32);
+                        output.Append((char)((current + (c >> 11)) + 32));
                         current = (c & 2047) << 4;
                         break;
                     case 11:
-                        output += (char)((current + (c >> 12)) + 32);
+                        output .Append((char)((current + (c >> 12)) + 32));
                         current = (c & 4095) << 3;
                         break;
                     case 12:
-                        output += (char)((current + (c >> 13)) + 32);
+                        output.Append((char)((current + (c >> 13)) + 32));
                         current = (c & 8191) << 2;
                         break;
                     case 13:
-                        output += (char)((current + (c >> 14)) + 32);
+                        output .Append((char)((current + (c >> 14)) + 32));
                         current = (c & 16383) << 1;
                         break;
                     case 14:
-                        output += (char)((current + (c >> 15)) + 32);
-                        output += (char)((c & 32767) + 32);
+                        output.Append((char)((current + (c >> 15)) + 32));
+                        output.Append((char)((c & 32767) + 32));
                         status = 0;
                         break;
                 }
             }
 
-            return output + (char)(current + 32);
+            output.Append((char)(current + 32));
+            return output.ToString();
         }
 
         public static string DecompressFromUTF16(string input)
         {
-            string output = "";
+            StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
             int i = 0;
@@ -420,76 +420,78 @@ namespace lz_string_csharp
                         current = c << 1;
                         break;
                     case 1:
-                        output += (char)(current | (c >> 14));
+                        output.Append((char)(current | (c >> 14)));
                         current = (c & 16383) << 2;
                         break;
                     case 2:
-                        output += (char)(current | (c >> 13));
+                        output.Append((char)(current | (c >> 13)));
                         current = (c & 8191) << 3;
                         break;
                     case 3:
-                        output += (char)(current | (c >> 12));
+                        output.Append((char)(current | (c >> 12)));
                         current = (c & 4095) << 4;
                         break;
                     case 4:
-                        output += (char)(current | (c >> 11));
+                        output.Append((char)(current | (c >> 11)));
                         current = (c & 2047) << 5;
                         break;
                     case 5:
-                        output += (char)(current | (c >> 10));
+                        output.Append((char)(current | (c >> 10)));
                         current = (c & 1023) << 6;
                         break;
                     case 6:
-                        output += (char)(current | (c >> 9));
+                        output.Append((char)(current | (c >> 9)));
                         current = (c & 511) << 7;
                         break;
                     case 7:
-                        output += (char)(current | (c >> 8));
+                        output.Append((char)(current | (c >> 8)));
                         current = (c & 255) << 8;
                         break;
                     case 8:
-                        output += (char)(current | (c >> 7));
+                        output.Append((char)(current | (c >> 7)));
                         current = (c & 127) << 9;
                         break;
                     case 9:
-                        output += (char)(current | (c >> 6));
+                        output.Append((char)(current | (c >> 6)));
                         current = (c & 63) << 10;
                         break;
                     case 10:
-                        output += (char)(current | (c >> 5));
+                        output.Append((char)(current | (c >> 5)));
                         current = (c & 31) << 11;
                         break;
                     case 11:
-                        output += (char)(current | (c >> 4));
+                        output.Append((char)(current | (c >> 4)));
                         current = (c & 15) << 12;
                         break;
                     case 12:
-                        output += (char)(current | (c >> 3));
+                        output.Append((char)(current | (c >> 3)));
                         current = (c & 7) << 13;
                         break;
                     case 13:
-                        output += (char)(current | (c >> 2));
+                        output.Append((char)(current | (c >> 2)));
                         current = (c & 3) << 14;
                         break;
                     case 14:
-                        output += (char)(current | (c >> 1));
+                        output.Append((char)(current | (c >> 1)));
                         current = (c & 1) << 15;
                         break;
                     case 15:
-                        output += (char)(current | c);
+                        output.Append((char)(current | c));
                         status = 0;
                         break;
+                    default:
+                        throw new InvalidOperationException($"Received invalid status: {status}");
                 }
 
                 i++;
             }
 
-            return Decompress(output);
+            return Decompress(output.ToString());
         }
 
         public static string CompressToBase64(string input)
         {
-            string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
             string output = "";
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
