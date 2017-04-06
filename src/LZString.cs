@@ -3,533 +3,496 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
 namespace lz_string_csharp
 {
-       public class LZString
+    public class LZString
     {
-
-        private class Context_Compress
+        private class ContextCompress
         {
-            public Dictionary<string, int> dictionary { get; set; }
-            public Dictionary<string, bool> dictionaryToCreate { get; set; }
-            public string c { get; set; }
-            public string wc { get; set; }
-            public string w { get; set; }
-            public int enlargeIn { get; set; }
-            public int dictSize { get; set; }
-            public int numBits { get; set; }
-            public Context_Compress_Data data { get; set; }
+            public Dictionary<string, int> Dictionary { get; set; }
+            public Dictionary<string, bool> DictionaryToCreate { get; set; }
+            public string C { get; set; }
+            public string Wc { get; set; }
+            public string W { get; set; }
+            public int EnlargeIn { get; set; }
+            public int DictSize { get; set; }
+            public int NumBits { get; set; }
+            public ContextCompressData Data { get; set; }
         }
 
-        private class Context_Compress_Data
+        private class ContextCompressData
         {
-            public string str { get; set; }
-            public int val { get; set; }
-            public int position { get; set; }
+            public string Str { get; set; }
+            public int Val { get; set; }
+            public int Position { get; set; }
         }
 
-        private class Decompress_Data
+        private class DecompressData
         {
-            public string str { get; set; }
-            public int val { get; set; }
-            public int position { get; set; }
-            public int index { get; set; }
+            public string Str { get; set; }
+            public int Val { get; set; }
+            public int Position { get; set; }
+            public int Index { get; set; }
         }
 
-        private static Context_Compress_Data writeBit(int value, Context_Compress_Data data)
+        private static ContextCompressData WriteBit(int value, ContextCompressData data)
         {
-            data.val = (data.val << 1) | value;
+            data.Val = (data.Val << 1) | value;
 
-            if (data.position == 15)
+            if (data.Position == 15)
             {
-                data.position = 0;
-                data.str += (char)data.val;
-                data.val = 0;
+                data.Position = 0;
+                data.Str += (char)data.Val;
+                data.Val = 0;
             }
             else
-                data.position++;
+                data.Position++;
 
             return data;
         }
 
-        private static Context_Compress_Data writeBits(int numbits, int value, Context_Compress_Data data)
+        private static ContextCompressData WriteBits(int numbits, int value, ContextCompressData data)
         {
-
             for (var i = 0; i < numbits; i++)
             {
-                data = writeBit(value & 1, data);
+                data = WriteBit(value & 1, data);
                 value = value >> 1;
             }
 
             return data;
         }
 
-        private static Context_Compress produceW(Context_Compress context)
+        private static ContextCompress ProduceW(ContextCompress context)
         {
-
-            if (context.dictionaryToCreate.ContainsKey(context.w))
+            if (context.DictionaryToCreate.ContainsKey(context.W))
             {
-                if (context.w[0] < 256)
+                if (context.W[0] < 256)
                 {
-                    context.data = writeBits(context.numBits, 0, context.data);
-                    context.data = writeBits(8, context.w[0], context.data);
+                    context.Data = WriteBits(context.NumBits, 0, context.Data);
+                    context.Data = WriteBits(8, context.W[0], context.Data);
                 }
                 else
                 {
-                    context.data = writeBits(context.numBits, 1, context.data);
-                    context.data = writeBits(16, context.w[0], context.data);
+                    context.Data = WriteBits(context.NumBits, 1, context.Data);
+                    context.Data = WriteBits(16, context.W[0], context.Data);
                 }
 
-                context = decrementEnlargeIn(context);
-                context.dictionaryToCreate.Remove(context.w);
+                context = DecrementEnlargeIn(context);
+                context.DictionaryToCreate.Remove(context.W);
             }
             else
             {
-                context.data = writeBits(context.numBits, context.dictionary[context.w], context.data);
+                context.Data = WriteBits(context.NumBits, context.Dictionary[context.W], context.Data);
             }
 
             return context;
         }
 
-        private static Context_Compress decrementEnlargeIn(Context_Compress context)
+        private static ContextCompress DecrementEnlargeIn(ContextCompress context)
         {
 
-            context.enlargeIn--;
-            if (context.enlargeIn == 0)
+            context.EnlargeIn--;
+            if (context.EnlargeIn == 0)
             {
-                context.enlargeIn = (int)Math.Pow(2, context.numBits);
-                context.numBits++;
+                context.EnlargeIn = (int)Math.Pow(2, context.NumBits);
+                context.NumBits++;
             }
             return context;
         }
 
-        public static string compress(string uncompressed)
+        public static string Compress(string uncompressed)
         {
+            ContextCompress context = new ContextCompress();
+            ContextCompressData data = new ContextCompressData();
 
-            Context_Compress context = new Context_Compress();
-            Context_Compress_Data data = new Context_Compress_Data();
+            context.Dictionary = new Dictionary<string, int>();
+            context.DictionaryToCreate = new Dictionary<string, bool>();
+            context.C = "";
+            context.Wc = "";
+            context.W = "";
+            context.EnlargeIn = 2;
+            context.DictSize = 3;
+            context.NumBits = 2;
 
-            context.dictionary = new Dictionary<string, int>();
-            context.dictionaryToCreate = new Dictionary<string, bool>();
-            context.c = "";
-            context.wc = "";
-            context.w = "";
-            context.enlargeIn = 2;
-            context.dictSize = 3;
-            context.numBits = 2;
+            data.Str = "";
+            data.Val = 0;
+            data.Position = 0;
 
-            data.str = "";
-            data.val = 0;
-            data.position = 0;
+            context.Data = data;
 
-            context.data = data;
-
-            try
+            foreach (char c in uncompressed)
             {
-                for (int i = 0; i < uncompressed.Length; i++)
+                context.C = c.ToString();
+
+                if (!context.Dictionary.ContainsKey(context.C))
                 {
-                    context.c = uncompressed[i].ToString();
-
-                    if (!context.dictionary.ContainsKey(context.c))
-                    {
-                        context.dictionary[context.c] = context.dictSize++;
-                        context.dictionaryToCreate[context.c] = true;
-                    };
-
-                    context.wc = context.w + context.c;
-
-                    if (context.dictionary.ContainsKey(context.wc))
-                    {
-                        context.w = context.wc;
-                    }
-                    else
-                    {
-                        context = produceW(context);
-                        context = decrementEnlargeIn(context);
-                        context.dictionary[context.wc] = context.dictSize++;
-                        context.w = context.c;
-                    }
+                    context.Dictionary[context.C] = context.DictSize++;
+                    context.DictionaryToCreate[context.C] = true;
                 }
 
-                if (context.w != "")
+                context.Wc = context.W + context.C;
+
+                if (context.Dictionary.ContainsKey(context.Wc))
                 {
-                    context = produceW(context);
+                    context.W = context.Wc;
                 }
-
-                // Mark the end of the stream
-                context.data = writeBits(context.numBits, 2, context.data);
-
-                // Flush the last char
-                while (true)
+                else
                 {
-                    context.data.val = (context.data.val << 1);
-                    if (context.data.position == 15)
-                    {
-                        context.data.str += (char)context.data.val;
-                        break;
-                    }
-                    else
-                        context.data.position++;
+                    context = ProduceW(context);
+                    context = DecrementEnlargeIn(context);
+                    context.Dictionary[context.Wc] = context.DictSize++;
+                    context.W = context.C;
                 }
-
-            }
-            catch (Exception ex)
-            {
-                throw ex;
             }
 
-            return context.data.str;
+            if (context.W != "")
+            {
+                context = ProduceW(context);
+            }
+
+            // Mark the end of the stream
+            context.Data = WriteBits(context.NumBits, 2, context.Data);
+
+            // Flush the last char
+            while (true)
+            {
+                context.Data.Val = (context.Data.Val << 1);
+                if (context.Data.Position == 15)
+                {
+                    context.Data.Str += (char)context.Data.Val;
+                    break;
+                }
+                else
+                    context.Data.Position++;
+            }
+
+            return context.Data.Str;
         }
 
-        private static int readBit(Decompress_Data data)
+        private static int ReadBit(DecompressData data)
         {
+            var res = data.Val & data.Position;
 
-            var res = data.val & data.position;
+            data.Position >>= 1;
 
-            data.position >>= 1;
-
-            if (data.position == 0)
+            if (data.Position == 0)
             {
-                data.position = 32768;
+                data.Position = 32768;
 
                 // This 'if' check doesn't appear in the orginal lz-string javascript code.
                 // Added as a check to make sure we don't exceed the length of data.str
                 // The javascript charCodeAt will return a NaN if it exceeds the index but will not error out
-                if (data.index < data.str.Length)
+                if (data.Index < data.Str.Length)
                 {
-                    data.val = data.str[data.index++]; // data.val = data.string.charCodeAt(data.index++); <---javascript equivilant
+                    data.Val = data.Str[data.Index++]; // data.val = data.string.charCodeAt(data.index++); <---javascript equivilant
                 }
             }
 
             return res > 0 ? 1 : 0;
         }
 
-        private static int readBits(int numBits, Decompress_Data data)
+        private static int ReadBits(int numBits, DecompressData data)
         {
-
             int res = 0;
             int maxpower = (int)Math.Pow(2, numBits);
             int power = 1;
 
             while (power != maxpower)
             {
-                res |= readBit(data) * power;
+                res |= ReadBit(data) * power;
                 power <<= 1;
             }
 
             return res;
         }
 
-        public static string decompress(string compressed)
+        public static string Decompress(string compressed)
         {
-
-            Decompress_Data data = new Decompress_Data();
+            DecompressData data = new DecompressData();
 
             List<string> dictionary = new List<string>();
             int next = 0;
             int enlargeIn = 4;
             int numBits = 3;
             string entry = "";
-            StringBuilder result = new StringBuilder(); 
+            StringBuilder result = new StringBuilder();
             int i = 0;
             string w = "";
             string sc = "";
             int c = 0;
             int errorCount = 0;
 
-            data.str = compressed;
-            data.val = (int)compressed[0];
-            data.position = 32768;
-            data.index = 1;
+            data.Str = compressed;
+            data.Val = compressed[0];
+            data.Position = 32768;
+            data.Index = 1;
 
-            try
+            for (i = 0; i < 3; i++)
             {
-                for (i = 0; i < 3; i++)
-                {
-                    dictionary.Add(i.ToString());
-                }
+                dictionary.Add(i.ToString());
+            }
 
-                next = readBits(2, data);
+            next = ReadBits(2, data);
 
-                switch (next)
+            switch (next)
+            {
+                case 0:
+                    sc = Convert.ToChar(ReadBits(8, data)).ToString();
+                    break;
+                case 1:
+                    sc = Convert.ToChar(ReadBits(16, data)).ToString();
+                    break;
+                case 2:
+                    return "";
+            }
+
+            dictionary.Add(sc);
+
+            result.Append(sc);
+            w = result.ToString();
+
+            while (true)
+            {
+                c = ReadBits(numBits, data);
+                int cc = c;
+
+                switch (cc)
                 {
                     case 0:
-                        sc = Convert.ToChar(readBits(8, data)).ToString();
+                        if (errorCount++ > 10000)
+                            throw new Exception("To many errors");
+
+                        sc = Convert.ToChar(ReadBits(8, data)).ToString();
+                        dictionary.Add(sc);
+                        c = dictionary.Count - 1;
+                        enlargeIn--;
+
                         break;
                     case 1:
-                        sc = Convert.ToChar(readBits(16, data)).ToString();
+                        sc = Convert.ToChar(ReadBits(16, data)).ToString();
+                        dictionary.Add(sc);
+                        c = dictionary.Count - 1;
+                        enlargeIn--;
+
                         break;
                     case 2:
-                        return "";
+                        return result.ToString();
                 }
 
-                dictionary.Add(sc);
-
-                result.Append(sc);
-                w = result.ToString();
-
-                while (true)
+                if (enlargeIn == 0)
                 {
-                    c = readBits(numBits, data);
-                    int cc = c;
+                    enlargeIn = (int)Math.Pow(2, numBits);
+                    numBits++;
+                }
 
-                    switch (cc)
+                if (dictionary.Count - 1 >= c) // if (dictionary[c] ) <------- original Javascript Equivalant
+                {
+                    entry = dictionary[c];
+                }
+                else
+                {
+                    if (c == dictionary.Count)
                     {
-                        case 0:
-                            if (errorCount++ > 10000)
-                                throw new Exception("To many errors");
-
-                            sc = Convert.ToChar(readBits(8, data)).ToString();
-                            dictionary.Add(sc);
-                            c = dictionary.Count - 1;
-                            enlargeIn--;
-
-                            break;
-                        case 1:
-                            sc = Convert.ToChar(readBits(16, data)).ToString();
-                            dictionary.Add(sc);
-                            c = dictionary.Count - 1;
-                            enlargeIn--;
-
-                            break;
-                        case 2:
-                            return result.ToString();
-                    }
-
-                    if (enlargeIn == 0)
-                    {
-                        enlargeIn = (int)Math.Pow(2, numBits);
-                        numBits++;
-                    }
-
-                    if (dictionary.Count - 1 >= c) // if (dictionary[c] ) <------- original Javascript Equivalant
-                    {
-                        entry = dictionary[c];
+                        entry = w + w[0];
                     }
                     else
                     {
-                        if (c == dictionary.Count)
-                        {
-                            entry = w + w[0];
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-
-                    result.Append(entry);
-                    dictionary.Add(w + entry[0]);
-                    enlargeIn--;
-                    w = entry;
-
-                    if (enlargeIn == 0)
-                    {
-                        enlargeIn = (int)Math.Pow(2, numBits);
-                        numBits++;
+                        return null;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+
+                result.Append(entry);
+                dictionary.Add(w + entry[0]);
+                enlargeIn--;
+                w = entry;
+
+                if (enlargeIn == 0)
+                {
+                    enlargeIn = (int)Math.Pow(2, numBits);
+                    numBits++;
+                }
             }
         }
 
-        public static string compressToUTF16(string input)
+        public static string CompressToUTF16(string input)
         {
-
-            string output = "";
+            StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
 
-            try
+            if (input == null)
+                throw new Exception("Input is Null");
+
+            input = Compress(input);
+            if (input.Length == 0)
+                return input;
+
+            for (int i = 0; i < input.Length; i++)
             {
-                if (input == null)
-                    throw new Exception("Input is Null");
-
-                input = compress(input);
-                if (input.Length == 0)
-                    return input;
-
-                for (int i = 0; i < input.Length; i++)
+                int c = input[i];
+                switch (status++)
                 {
-                    int c = (int)input[i];
-                    switch (status++)
-                    {
-                        case 0:
-                            output += (char)((c >> 1) + 32);
-                            current = (c & 1) << 14;
-                            break;
-                        case 1:
-                            output += (char)((current + (c >> 2)) + 32);
-                            current = (c & 3) << 13;
-                            break;
-                        case 2:
-                            output += (char)((current + (c >> 3)) + 32);
-                            current = (c & 7) << 12;
-                            break;
-                        case 3:
-                            output += (char)((current + (c >> 4)) + 32);
-                            current = (c & 15) << 11;
-                            break;
-                        case 4:
-                            output += (char)((current + (c >> 5)) + 32);
-                            current = (c & 31) << 10;
-                            break;
-                        case 5:
-                            output += (char)((current + (c >> 6)) + 32);
-                            current = (c & 63) << 9;
-                            break;
-                        case 6:
-                            output += (char)((current + (c >> 7)) + 32);
-                            current = (c & 127) << 8;
-                            break;
-                        case 7:
-                            output += (char)((current + (c >> 8)) + 32);
-                            current = (c & 255) << 7;
-                            break;
-                        case 8:
-                            output += (char)((current + (c >> 9)) + 32);
-                            current = (c & 511) << 6;
-                            break;
-                        case 9:
-                            output += (char)((current + (c >> 10)) + 32);
-                            current = (c & 1023) << 5;
-                            break;
-                        case 10:
-                            output += (char)((current + (c >> 11)) + 32);
-                            current = (c & 2047) << 4;
-                            break;
-                        case 11:
-                            output += (char)((current + (c >> 12)) + 32);
-                            current = (c & 4095) << 3;
-                            break;
-                        case 12:
-                            output += (char)((current + (c >> 13)) + 32);
-                            current = (c & 8191) << 2;
-                            break;
-                        case 13:
-                            output += (char)((current + (c >> 14)) + 32);
-                            current = (c & 16383) << 1;
-                            break;
-                        case 14:
-                            output += (char)((current + (c >> 15)) + 32);
-                            output += (char)((c & 32767) + 32);
-                            status = 0;
-                            break;
-                    }
+                    case 0:
+                        output.Append((char)((c >> 1) + 32));
+                        current = (c & 1) << 14;
+                        break;
+                    case 1:
+                        output.Append((char)((current + (c >> 2)) + 32));
+                        current = (c & 3) << 13;
+                        break;
+                    case 2:
+                        output.Append((char)((current + (c >> 3)) + 32));
+                        current = (c & 7) << 12;
+                        break;
+                    case 3:
+                        output.Append((char)((current + (c >> 4)) + 32));
+                        current = (c & 15) << 11;
+                        break;
+                    case 4:
+                        output.Append((char)((current + (c >> 5)) + 32));
+                        current = (c & 31) << 10;
+                        break;
+                    case 5:
+                        output.Append((char)((current + (c >> 6)) + 32));
+                        current = (c & 63) << 9;
+                        break;
+                    case 6:
+                        output.Append((char)((current + (c >> 7)) + 32));
+                        current = (c & 127) << 8;
+                        break;
+                    case 7:
+                        output.Append((char)((current + (c >> 8)) + 32));
+                        current = (c & 255) << 7;
+                        break;
+                    case 8:
+                        output.Append((char)((current + (c >> 9)) + 32));
+                        current = (c & 511) << 6;
+                        break;
+                    case 9:
+                        output.Append((char)((current + (c >> 10)) + 32));
+                        current = (c & 1023) << 5;
+                        break;
+                    case 10:
+                        output.Append((char)((current + (c >> 11)) + 32));
+                        current = (c & 2047) << 4;
+                        break;
+                    case 11:
+                        output .Append((char)((current + (c >> 12)) + 32));
+                        current = (c & 4095) << 3;
+                        break;
+                    case 12:
+                        output.Append((char)((current + (c >> 13)) + 32));
+                        current = (c & 8191) << 2;
+                        break;
+                    case 13:
+                        output .Append((char)((current + (c >> 14)) + 32));
+                        current = (c & 16383) << 1;
+                        break;
+                    case 14:
+                        output.Append((char)((current + (c >> 15)) + 32));
+                        output.Append((char)((c & 32767) + 32));
+                        status = 0;
+                        break;
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
 
-            return output + (char)(current + 32);
+            output.Append((char)(current + 32));
+            return output.ToString();
         }
 
-        public static string decompressFromUTF16(string input)
+        public static string DecompressFromUTF16(string input)
         {
-
-            string output = "";
+            StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
             int i = 0;
 
-            try
-            {
-                if (input == null)
-                    throw new Exception("input is Null");
+            if (input == null)
+                throw new Exception("input is Null");
 
-                while (i < input.Length)
+            while (i < input.Length)
+            {
+                int c = input[i] - 32;
+
+                switch (status++)
                 {
-                    int c = ((int)input[i]) - 32;
-
-                    switch (status++)
-                    {
-                        case 0:
-                            current = c << 1;
-                            break;
-                        case 1:
-                            output += (char)(current | (c >> 14));
-                            current = (c & 16383) << 2;
-                            break;
-                        case 2:
-                            output += (char)(current | (c >> 13));
-                            current = (c & 8191) << 3;
-                            break;
-                        case 3:
-                            output += (char)(current | (c >> 12));
-                            current = (c & 4095) << 4;
-                            break;
-                        case 4:
-                            output += (char)(current | (c >> 11));
-                            current = (c & 2047) << 5;
-                            break;
-                        case 5:
-                            output += (char)(current | (c >> 10));
-                            current = (c & 1023) << 6;
-                            break;
-                        case 6:
-                            output += (char)(current | (c >> 9));
-                            current = (c & 511) << 7;
-                            break;
-                        case 7:
-                            output += (char)(current | (c >> 8));
-                            current = (c & 255) << 8;
-                            break;
-                        case 8:
-                            output += (char)(current | (c >> 7));
-                            current = (c & 127) << 9;
-                            break;
-                        case 9:
-                            output += (char)(current | (c >> 6));
-                            current = (c & 63) << 10;
-                            break;
-                        case 10:
-                            output += (char)(current | (c >> 5));
-                            current = (c & 31) << 11;
-                            break;
-                        case 11:
-                            output += (char)(current | (c >> 4));
-                            current = (c & 15) << 12;
-                            break;
-                        case 12:
-                            output += (char)(current | (c >> 3));
-                            current = (c & 7) << 13;
-                            break;
-                        case 13:
-                            output += (char)(current | (c >> 2));
-                            current = (c & 3) << 14;
-                            break;
-                        case 14:
-                            output += (char)(current | (c >> 1));
-                            current = (c & 1) << 15;
-                            break;
-                        case 15:
-                            output += (char)(current | c);
-                            status = 0;
-                            break;
-                    }
-
-                    i++;
+                    case 0:
+                        current = c << 1;
+                        break;
+                    case 1:
+                        output.Append((char)(current | (c >> 14)));
+                        current = (c & 16383) << 2;
+                        break;
+                    case 2:
+                        output.Append((char)(current | (c >> 13)));
+                        current = (c & 8191) << 3;
+                        break;
+                    case 3:
+                        output.Append((char)(current | (c >> 12)));
+                        current = (c & 4095) << 4;
+                        break;
+                    case 4:
+                        output.Append((char)(current | (c >> 11)));
+                        current = (c & 2047) << 5;
+                        break;
+                    case 5:
+                        output.Append((char)(current | (c >> 10)));
+                        current = (c & 1023) << 6;
+                        break;
+                    case 6:
+                        output.Append((char)(current | (c >> 9)));
+                        current = (c & 511) << 7;
+                        break;
+                    case 7:
+                        output.Append((char)(current | (c >> 8)));
+                        current = (c & 255) << 8;
+                        break;
+                    case 8:
+                        output.Append((char)(current | (c >> 7)));
+                        current = (c & 127) << 9;
+                        break;
+                    case 9:
+                        output.Append((char)(current | (c >> 6)));
+                        current = (c & 63) << 10;
+                        break;
+                    case 10:
+                        output.Append((char)(current | (c >> 5)));
+                        current = (c & 31) << 11;
+                        break;
+                    case 11:
+                        output.Append((char)(current | (c >> 4)));
+                        current = (c & 15) << 12;
+                        break;
+                    case 12:
+                        output.Append((char)(current | (c >> 3)));
+                        current = (c & 7) << 13;
+                        break;
+                    case 13:
+                        output.Append((char)(current | (c >> 2)));
+                        current = (c & 3) << 14;
+                        break;
+                    case 14:
+                        output.Append((char)(current | (c >> 1)));
+                        current = (c & 1) << 15;
+                        break;
+                    case 15:
+                        output.Append((char)(current | c));
+                        status = 0;
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Received invalid status: {status}");
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+
+                i++;
             }
 
-            return decompress(output);
+            return Decompress(output.ToString());
         }
 
-        public static string compressToBase64(string input)
+        public static string CompressToBase64(string input)
         {
-
-            string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-            string output = "";
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            StringBuilder output = new StringBuilder();
 
             // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
             // later in the function. .Net doesn't have a similar function for regular integers.
@@ -541,160 +504,145 @@ namespace lz_string_csharp
             int enc4 = 0;
             int i = 0;
 
-            try
+            if (input == null)
+                throw new Exception("input is Null");
+
+            input = Compress(input);
+
+            while (i < input.Length * 2)
             {
-                if (input == null)
-                    throw new Exception("input is Null");
-
-                input = compress(input);
-
-                while (i < input.Length * 2)
+                if (i % 2 == 0)
                 {
-                    if (i % 2 == 0)
+                    chr1 = input[i / 2] >> 8;
+                    chr2 = input[i / 2] & 255;
+                    if (i / 2 + 1 < input.Length)
+                        chr3 = input[i / 2 + 1] >> 8;
+                    else
+                        chr3 = double.NaN;//chr3 = NaN; <------ original Javascript Equivalent
+                }
+                else
+                {
+                    chr1 = input[(i - 1) / 2] & 255;
+                    if ((i + 1) / 2 < input.Length)
                     {
-                        chr1 = (int)input[i / 2] >> 8;
-                        chr2 = (int)input[i / 2] & 255;
-                        if (i / 2 + 1 < input.Length)
-                            chr3 = (int)input[i / 2 + 1] >> 8;
-                        else
-                            chr3 = double.NaN;//chr3 = NaN; <------ original Javascript Equivalent
+                        chr2 = input[(i + 1) / 2] >> 8;
+                        chr3 = input[(i + 1) / 2] & 255;
                     }
                     else
                     {
-                        chr1 = (int)input[(i - 1) / 2] & 255;
-                        if ((i + 1) / 2 < input.Length)
-                        {
-                            chr2 = (int)input[(i + 1) / 2] >> 8;
-                            chr3 = (int)input[(i + 1) / 2] & 255;
-                        }
-                        else
-                        {
-                            chr2 = chr3 = double.NaN; // chr2 = chr3 = NaN; <------ original Javascript Equivalent
-                        }
+                        chr2 = chr3 = double.NaN; // chr2 = chr3 = NaN; <------ original Javascript Equivalent
                     }
-                    i += 3;
-
-
-                    enc1 = (int)(Math.Round(chr1)) >> 2;
-
-                    // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
-                    // assigned to 'double.NaN' above. The orginal Javascript functions didn't need these checks due to how
-                    // Javascript functions.
-                    // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type
-                    // conversion to get the 'enc' variables to be the correct value.
-                    if (!double.IsNaN(chr2))
-                    {
-                        enc2 = (((int)(Math.Round(chr1)) & 3) << 4) | ((int)(Math.Round(chr2)) >> 4);
-                    }
-
-                    if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
-                    {
-                        enc3 = (((int)(Math.Round(chr2)) & 15) << 2) | ((int)(Math.Round(chr3)) >> 6);
-                    }
-                    // added per issue #3 logged by ReuvenT
-                    else 
-                    {
-                        enc3 = 0;
-                    }
-
-                    if (!double.IsNaN(chr3))
-                    {
-
-                        enc4 = (int)(Math.Round(chr3)) & 63;
-                    }
-
-                    if (double.IsNaN(chr2)) //if (isNaN(chr2)) <------ original Javascript Equivalent
-                    {
-                        enc3 = enc4 = 64;
-                    }
-                    else if (double.IsNaN(chr3)) //else if (isNaN(chr3)) <------ original Javascript Equivalent
-                    {
-                        enc4 = 64;
-                    }
-
-                    output = output + _keyStr[enc1] + _keyStr[enc2] + _keyStr[enc3] + _keyStr[enc4];
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                i += 3;
+
+                enc1 = enc2 = enc3 = enc4 = 0; //re-set enc variables to zero so that they do not retain their values from previous iterations in the loop.
+                enc1 = (int)(Math.Round(chr1)) >> 2;
+
+                // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
+                // assigned to 'double.NaN' above. The orginal Javascript functions didn't need these checks due to how
+                // Javascript functions.
+                // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type
+                // conversion to get the 'enc' variables to be the correct value.
+                if (!double.IsNaN(chr2))
+                {
+                    enc2 = (((int)(Math.Round(chr1)) & 3) << 4) | ((int)(Math.Round(chr2)) >> 4);
+                }
+
+                if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
+                {
+                    enc3 = (((int)(Math.Round(chr2)) & 15) << 2) | ((int)(Math.Round(chr3)) >> 6);
+                }
+                // added per issue #3 logged by ReuvenT
+                else
+                {
+                    enc3 = 0;
+                }
+
+                if (!double.IsNaN(chr3))
+                {
+
+                    enc4 = (int)(Math.Round(chr3)) & 63;
+                }
+
+                if (double.IsNaN(chr2)) //if (isNaN(chr2)) <------ original Javascript Equivalent
+                {
+                    enc3 = enc4 = 64;
+                }
+                else if (double.IsNaN(chr3)) //else if (isNaN(chr3)) <------ original Javascript Equivalent
+                {
+                    enc4 = 64;
+                }
+
+                output.Append(keyStr[enc1]);
+                output.Append(keyStr[enc2]);
+                output.Append(keyStr[enc3]);
+                output.Append(keyStr[enc4]);
             }
 
-            return output;
+            return output.ToString();
         }
 
-        public static string decompressFromBase64(string input)
+        public static string DecompressFromBase64(string input)
         {
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-            string _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-            string output = "";
+            StringBuilder output = new StringBuilder();
+            // ReSharper disable once InconsistentNaming
             int output_ = 0;
             int ol = 0;
             int chr1, chr2, chr3 = 0;
             int enc1, enc2, enc3, enc4 = 0;
             int i = 0;
 
-            try
+            if (input == null)
+                throw new Exception("input is Null");
+
+            var regex = new Regex(@"[^A-Za-z0-9-\+\/\=]");
+            input = regex.Replace(input, "");
+
+            while (i < input.Length)
             {
-                if (input == null)
-                    throw new Exception("input is Null");
+                enc1 = keyStr.IndexOf(input[i++]);
+                enc2 = keyStr.IndexOf(input[i++]);
+                enc3 = keyStr.IndexOf(input[i++]);
+                enc4 = keyStr.IndexOf(input[i++]);
 
-                var regex = new Regex(@"[^A-Za-z0-9-\+\/\=]");
-                input = regex.Replace(input, "");
+                chr1 = (enc1 << 2) | (enc2 >> 4);
+                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                chr3 = ((enc3 & 3) << 6) | enc4;
 
-                while (i < input.Length)
+                if (ol % 2 == 0)
                 {
-                    enc1 = _keyStr.IndexOf(input[i++]);
-                    enc2 = _keyStr.IndexOf(input[i++]);
-                    enc3 = _keyStr.IndexOf(input[i++]);
-                    enc4 = _keyStr.IndexOf(input[i++]);
+                    output_ = chr1 << 8;
 
-                    chr1 = (enc1 << 2) | (enc2 >> 4);
-                    chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-                    chr3 = ((enc3 & 3) << 6) | enc4;
-
-                    if (ol % 2 == 0)
+                    if (enc3 != 64)
                     {
-                        output_ = chr1 << 8;
-
-                        if (enc3 != 64)
-                        {
-                            output += (char)(output_ | chr2);
-                        }
-
-                        if (enc4 != 64)
-                        {
-                            output_ = chr3 << 8;
-                        }
+                        output.Append((char)(output_ | chr2));
                     }
-                    else
+
+                    if (enc4 != 64)
                     {
-                        output = output + (char)(output_ | chr1);
-
-                        if (enc3 != 64)
-                        {
-                            output_ = chr2 << 8;
-                        }
-                        if (enc4 != 64)
-                        {
-                            output += (char)(output_ | chr3);
-                        }
+                        output_ = chr3 << 8;
                     }
-                    ol += 3;
                 }
+                else
+                {
+                    output.Append((char)(output_ | chr1));
 
-                // Send the output out to the main decompress function
-                output = decompress(output);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                    if (enc3 != 64)
+                    {
+                        output_ = chr2 << 8;
+                    }
+                    if (enc4 != 64)
+                    {
+                        output.Append((char)(output_ | chr3));
+                    }
+                }
+                ol += 3;
             }
 
-            return output;
+            // Send the output out to the main decompress function
+            return Decompress(output.ToString());
         }
-
     }
-
 }
