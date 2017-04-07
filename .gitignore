@@ -113,6 +113,7 @@ ClientBin/
 *.[Pp]ublish.xml
 *.pfx
 *.publishsettings
+.vs/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -151,3 +152,6 @@ $RECYCLE.BIN/
 
 packages/
 *.nupkg
+/lz-string-sharp/lz-string-csharp.csproj
+/lz-string-sharp/LZString.cs
+/lz-string-sharp/LZString.cs

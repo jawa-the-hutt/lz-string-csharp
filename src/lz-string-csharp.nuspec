@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
 	<metadata>
-		<id>ZString</id>
+		<id>LZString</id>
 		<version>$version$</version>
 		<title>LZString</title>
 		<authors>jawa-the-hutt</authors>
