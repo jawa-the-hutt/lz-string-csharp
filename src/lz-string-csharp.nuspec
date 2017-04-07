@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>ZString</id>
+		<version>$version$</version>
+		<title>LZString</title>
+		<authors>jawa-the-hutt</authors>
+		<owners>jawa-the-hutt</owners>
+		<licenseUrl>https://github.com/jawa-the-hutt/lz-string-csharp/blob/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/jawa-the-hutt/lz-string-csharp</projectUrl>
+		<!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>LZ String C# Compression Library</description>
+		<releaseNotes>Initial release</releaseNotes>
+		<tags>compression lz</tags>
+	</metadata>
+</package>
