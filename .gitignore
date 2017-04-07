@@ -152,6 +152,3 @@ $RECYCLE.BIN/
 
 packages/
 *.nupkg
-/lz-string-sharp/lz-string-csharp.csproj
-/lz-string-sharp/LZString.cs
-/lz-string-sharp/LZString.cs

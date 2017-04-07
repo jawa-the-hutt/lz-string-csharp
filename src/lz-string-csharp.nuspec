@@ -4,7 +4,7 @@
 		<id>LZString</id>
 		<version>$version$</version>
 		<title>LZString</title>
-		<authors>jawa-the-hutt</authors>
+		<authors>jawa-the-hutt,Christian Rondeau</authors>
 		<owners>jawa-the-hutt</owners>
 		<licenseUrl>https://github.com/jawa-the-hutt/lz-string-csharp/blob/master/LICENSE</licenseUrl>
 		<projectUrl>https://github.com/jawa-the-hutt/lz-string-csharp</projectUrl>
