@@ -1,0 +1,30 @@
+{
+  "name": "lz-string-csharp",
+  "version": "1.0.0",
+  "description": "lz-string c# implementation",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christianrondeau/lz-string-csharp.git"
+  },
+  "keywords": [
+    "lz-string",
+    "csharp",
+    "compression"
+  ],
+  "author": "Christian Rondeau <christian.rondeau@gmail.com> (http://christianrondeau.net)",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/christianrondeau/lz-string-csharp/issues"
+  },
+  "homepage": "https://github.com/christianrondeau/lz-string-csharp#readme",
+  "devDependencies": {
+    "lz-string": "^1.4.4"
+  }
+}

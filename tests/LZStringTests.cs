@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using NUnit.Framework;
 
 namespace LZStringCSharp.Tests
@@ -70,6 +74,12 @@ namespace LZStringCSharp.Tests
             Assert.That(LZString.CompressToEncodedURIComponent(test.Uncompressed), Is.EqualTo(test.CompressedEncodedURIComponent));
         }
 
+        [TestCaseSource(nameof(TestCases))]
+        public void NodeCompatible(LZStringTestCase test)
+        {
+            Assert.That(RunNodeLzString(test.Uncompressed), Is.EqualTo(test.Uncompressed));
+        }
+
         public struct LZStringTestCase
         {
             public string Name;
@@ -79,6 +89,53 @@ namespace LZStringCSharp.Tests
             public string CompressedUTF16;
             public string CompressedEncodedURIComponent;
             public override string ToString() => Name;
+        }
+
+        private static string RunNodeLzString(string value)
+        {
+            var tempFile = Path.GetTempFileName();
+            File.WriteAllText(tempFile, value);
+            try
+            {
+                var output = new StringBuilder();
+                var error = new StringBuilder();
+                // ReSharper disable once AssignNullToNotNullAttribute
+                var workingDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory), "../../"));
+                if (!Directory.Exists(Path.Combine(workingDirectory, "node_modules", "lz-string")))
+                    Assert.Inconclusive( $"lz-string is not installed. Use `npm install` in `{workingDirectory}` and re-run tests.");
+                using (var process = new Process
+                {
+                    StartInfo =
+                    {
+                        WorkingDirectory = workingDirectory,
+                        FileName = "cmd.exe",
+                        Arguments = $"cmd /C node -e \"var lzString = require('lz-string'); console.log(lzString.compress(fs.readFileSync('{tempFile.Replace("\\", "/")}', {{encoding: 'utf8'}})));\"",
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                })
+                {
+                    process.OutputDataReceived += (sender, args) => output.AppendLine(args.Data);
+                    process.ErrorDataReceived += (sender, args) => error.AppendLine(args.Data);
+                    process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    if (!process.WaitForExit(10 * 1000))
+                        Assert.Fail($"Node timeout: {output}{Environment.NewLine}{error}");
+                }
+
+                if(error.Length > 4) // Two line breaks
+                    Assert.Fail($"Node error: {error}");
+                return output.ToString();
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                    File.Delete(tempFile);
+            }
         }
     }
 }

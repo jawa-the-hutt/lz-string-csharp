@@ -152,3 +152,4 @@ $RECYCLE.BIN/
 
 packages/
 *.nupkg
+node_modules
