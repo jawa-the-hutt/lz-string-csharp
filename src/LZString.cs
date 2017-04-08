@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace LZStringCSharp
 {
@@ -207,6 +208,8 @@ namespace LZStringCSharp
 
         public static string Decompress(string compressed)
         {
+            if (compressed == null) throw new ArgumentNullException(nameof(compressed));
+
             DecompressData data = new DecompressData();
 
             List<string> dictionary = new List<string>();
@@ -315,6 +318,8 @@ namespace LZStringCSharp
 
         public static string CompressToUTF16(string input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+
             StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
@@ -401,6 +406,8 @@ namespace LZStringCSharp
 
         public static string DecompressFromUTF16(string input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+
             StringBuilder output = new StringBuilder();
             int status = 0;
             int current = 0;
@@ -490,41 +497,172 @@ namespace LZStringCSharp
 
         public static string CompressToBase64(string input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            StringBuilder output = new StringBuilder();
+
+            // Using the data type 'double' for these so that the .Net double.NaN & double.IsNaN functions can be used
+            // later in the function. .Net doesn't have a similar function for regular integers.
+            double chr1, chr2, chr3 = 0.0;
+
+            int enc1 = 0;
+            int enc2 = 0;
+            int enc3 = 0;
+            int enc4 = 0;
+            int i = 0;
+
             if (input == null)
                 throw new Exception("input is Null");
 
-            // Compress the string, encode in a byte array and then
-            // convert it to a Base64 String
-            var compressedBytes = Encoding.UTF8.GetBytes(Compress(input));
-            return Convert.ToBase64String(compressedBytes);
+            input = Compress(input);
 
+            while (i < input.Length * 2)
+            {
+                if (i % 2 == 0)
+                {
+                    chr1 = input[i / 2] >> 8;
+                    chr2 = input[i / 2] & 255;
+                    if (i / 2 + 1 < input.Length)
+                        chr3 = input[i / 2 + 1] >> 8;
+                    else
+                        chr3 = double.NaN;//chr3 = NaN; <------ original Javascript Equivalent
+                }
+                else
+                {
+                    chr1 = input[(i - 1) / 2] & 255;
+                    if ((i + 1) / 2 < input.Length)
+                    {
+                        chr2 = input[(i + 1) / 2] >> 8;
+                        chr3 = input[(i + 1) / 2] & 255;
+                    }
+                    else
+                    {
+                        chr2 = chr3 = double.NaN; // chr2 = chr3 = NaN; <------ original Javascript Equivalent
+                    }
+                }
+                i += 3;
+
+                enc1 = enc2 = enc3 = enc4 = 0; //re-set enc variables to zero so that they do not retain their values from previous iterations in the loop.
+                enc1 = (int)(Math.Round(chr1)) >> 2;
+
+                // The next three 'if' statements are there to make sure we are not trying to calculate a value that has been 
+                // assigned to 'double.NaN' above. The orginal Javascript functions didn't need these checks due to how
+                // Javascript functions.
+                // Also, due to the fact that some of the variables are of the data type 'double', we have to do some type
+                // conversion to get the 'enc' variables to be the correct value.
+                if (!double.IsNaN(chr2))
+                {
+                    enc2 = (((int)(Math.Round(chr1)) & 3) << 4) | ((int)(Math.Round(chr2)) >> 4);
+                }
+
+                if (!double.IsNaN(chr2) && !double.IsNaN(chr3))
+                {
+                    enc3 = (((int)(Math.Round(chr2)) & 15) << 2) | ((int)(Math.Round(chr3)) >> 6);
+                }
+                // added per issue #3 logged by ReuvenT
+                else
+                {
+                    enc3 = 0;
+                }
+
+                if (!double.IsNaN(chr3))
+                {
+
+                    enc4 = (int)(Math.Round(chr3)) & 63;
+                }
+
+                if (double.IsNaN(chr2)) //if (isNaN(chr2)) <------ original Javascript Equivalent
+                {
+                    enc3 = enc4 = 64;
+                }
+                else if (double.IsNaN(chr3)) //else if (isNaN(chr3)) <------ original Javascript Equivalent
+                {
+                    enc4 = 64;
+                }
+
+                output.Append(keyStr[enc1]);
+                output.Append(keyStr[enc2]);
+                output.Append(keyStr[enc3]);
+                output.Append(keyStr[enc4]);
+            }
+
+            return output.ToString();
         }
 
         public static string DecompressFromBase64(string input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            const string keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+            StringBuilder output = new StringBuilder();
+            // ReSharper disable once InconsistentNaming
+            int output_ = 0;
+            int ol = 0;
+            int chr1, chr2, chr3 = 0;
+            int enc1, enc2, enc3, enc4 = 0;
+            int i = 0;
+
             if (input == null)
                 throw new Exception("input is Null");
 
-            // convert the base64 string to a byte array
-            var base64 = Convert.FromBase64String(input);
-            
-            // convert byte array back to a compressed string and then
-            // send the compressed string out to the main decompress function
-            return Decompress(Encoding.UTF8.GetString(base64));
+            var regex = new Regex(@"[^A-Za-z0-9-\+\/\=]");
+            input = regex.Replace(input, "");
+
+            while (i < input.Length)
+            {
+                enc1 = keyStr.IndexOf(input[i++]);
+                enc2 = keyStr.IndexOf(input[i++]);
+                enc3 = keyStr.IndexOf(input[i++]);
+                enc4 = keyStr.IndexOf(input[i++]);
+
+                chr1 = (enc1 << 2) | (enc2 >> 4);
+                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                chr3 = ((enc3 & 3) << 6) | enc4;
+
+                if (ol % 2 == 0)
+                {
+                    output_ = chr1 << 8;
+
+                    if (enc3 != 64)
+                    {
+                        output.Append((char)(output_ | chr2));
+                    }
+
+                    if (enc4 != 64)
+                    {
+                        output_ = chr3 << 8;
+                    }
+                }
+                else
+                {
+                    output.Append((char)(output_ | chr1));
+
+                    if (enc3 != 64)
+                    {
+                        output_ = chr2 << 8;
+                    }
+                    if (enc4 != 64)
+                    {
+                        output.Append((char)(output_ | chr3));
+                    }
+                }
+                ol += 3;
+            }
+
+            // Send the output out to the main decompress function
+            return Decompress(output.ToString());
         }
 
         public static string CompressToEncodedURIComponent(string input)
         {
-            if (input == null)
-                throw new Exception("input is Null");
+            if (input == null) throw new ArgumentNullException(nameof(input));
 
             return Uri.EscapeDataString(Compress(input));
         }
 
         public static string DecompressFromEncodedURIComponent(string input)
         {
-            if (input == null)
-                throw new Exception("input is Null");
+            if (input == null) throw new ArgumentNullException(nameof(input));
            
             return Decompress(Uri.UnescapeDataString(input));
         }

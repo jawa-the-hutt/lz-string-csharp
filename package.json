@@ -1,0 +1,30 @@
+{
+  "name": "lz-string-csharp",
+  "version": "1.0.0",
+  "description": "lz-string c# implementation",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jawa-the-hutt/lz-string-csharp.git"
+  },
+  "keywords": [
+    "lz-string",
+    "csharp",
+    "compression"
+  ],
+  "author": "jawa-the-hutt",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/jawa-the-hutt/lz-string-csharp/issues"
+  },
+  "homepage": "https://github.com/jawa-the-hutt/lz-string-csharp",
+  "devDependencies": {
+    "lz-string": "^1.4.4"
+  }
+}
