@@ -31,7 +31,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>LZString</RootNamespace>
+    <RootNamespace>LZStringCSharp</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

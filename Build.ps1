@@ -18,7 +18,7 @@ Function GetMSBuildExe {
 
 $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
 $BuildPath = "$PSScriptRoot\src\bin\Release"
-$CSProjPath = "$PSScriptRoot\src\lz-string-csharp.csproj"
+$CSProjPath = "$PSScriptRoot\src\LZStringCSharp.csproj"
 
 # ==================================== Build
 

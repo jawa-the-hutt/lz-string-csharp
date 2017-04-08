@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
 	<metadata>
-		<id>LZString</id>
+		<id>LZStringCSharp</id>
 		<version>$version$</version>
-		<title>LZString</title>
+		<title>LZStringCSharp</title>
 		<authors>jawa-the-hutt,Christian Rondeau</authors>
 		<owners>jawa-the-hutt</owners>
 		<licenseUrl>https://github.com/jawa-the-hutt/lz-string-csharp/blob/master/LICENSE</licenseUrl>

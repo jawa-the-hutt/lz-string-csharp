@@ -7,8 +7,8 @@
     <ProjectGuid>{B8504599-355D-46BA-A20B-A4C99369CF6A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LZStringCSharp_Tests</RootNamespace>
-    <AssemblyName>LZStringCSharpTests</AssemblyName>
+    <RootNamespace>LZStringCSharp.Tests</RootNamespace>
+    <AssemblyName>LZStringCSharp.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using LZStringCSharp;
 using NUnit.Framework;
 
-namespace LZStringCSharp_Tests
+namespace LZStringCSharp.Tests
 {
     public class LZStringTests
     {
