@@ -1,16 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lz-string-csharp", "src\lz-string-csharp.csproj", "{4E440D71-82BE-4217-A1DC-98BF45945EB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LZStringCSharp", "src\LZStringCSharp.csproj", "{4E440D71-82BE-4217-A1DC-98BF45945EB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lz-string-csharp-tests", "tests\lz-string-csharp-tests.csproj", "{B8504599-355D-46BA-A20B-A4C99369CF6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LZStringCSharp_Tests", "tests\LZStringCSharp_Tests.csproj", "{B8504599-355D-46BA-A20B-A4C99369CF6A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{DAC6766A-AB11-4C4F-A077-C6B46AD1CC87}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		CONTRIBUTING.md = CONTRIBUTING.md
 		README.md = README.md
 	EndProjectSection
 EndProject

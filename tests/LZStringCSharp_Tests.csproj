@@ -7,8 +7,8 @@
     <ProjectGuid>{B8504599-355D-46BA-A20B-A4C99369CF6A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>lz_string_csharp_tests</RootNamespace>
-    <AssemblyName>lz-string-csharp-tests</AssemblyName>
+    <RootNamespace>LZStringCSharp_Tests</RootNamespace>
+    <AssemblyName>LZStringCSharpTests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,9 +51,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\lz-string-csharp.csproj">
+    <ProjectReference Include="..\src\LZStringCSharp.csproj">
       <Project>{4E440D71-82BE-4217-A1DC-98BF45945EB0}</Project>
-      <Name>lz-string-csharp</Name>
+      <Name>LZStringCSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
