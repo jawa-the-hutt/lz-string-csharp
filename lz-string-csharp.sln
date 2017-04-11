@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LZStringCSharp", "src\LZStringCSharp.csproj", "{4E440D71-82BE-4217-A1DC-98BF45945EB0}"
 EndProject
@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{DAC6766A
 		.gitignore = .gitignore
 		Build.ps1 = Build.ps1
 		CONTRIBUTING.md = CONTRIBUTING.md
+		lz-string-csharp.sln.DotSettings = lz-string-csharp.sln.DotSettings
+		package.json = package.json
 		README.md = README.md
 	EndProjectSection
 EndProject

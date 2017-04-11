@@ -77,11 +77,11 @@ namespace LZStringCSharp.Tests
         [TestCaseSource(nameof(TestCases))]
         public void CompatibilityCompressBase64FromNode(LZStringTestCase test)
         {
-            if(test.Name == "UTF-8 String")
+            if (test.Name == "UTF-8 String")
                 Assert.Inconclusive("lz-string implementation seems broken for this test case");
 
             var compress = RunNodeLzString("compressToBase64", test.Uncompressed);
-            string uncompress = null;
+            string uncompress = "";
             try
             {
                 uncompress = LZString.DecompressFromBase64(compress);
@@ -174,10 +174,10 @@ namespace LZStringCSharp.Tests
             }
             finally
             {
-                if (File.Exists(inputTempFile))
-                    File.Delete(inputTempFile);
-                if (File.Exists(outputTempFile))
-                    File.Delete(outputTempFile);
+                //if (File.Exists(inputTempFile))
+                    //File.Delete(inputTempFile);
+                //if (File.Exists(outputTempFile))
+                    //File.Delete(outputTempFile);
             }
         }
     }

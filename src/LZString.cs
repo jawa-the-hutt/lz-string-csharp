@@ -209,7 +209,6 @@ namespace LZStringCSharp
         public static string Decompress(string compressed)
         {
             if (compressed == null) throw new ArgumentNullException(nameof(compressed));
-
             DecompressData data = new DecompressData();
 
             List<string> dictionary = new List<string>();
