@@ -16,7 +16,7 @@ namespace LZStringCSharp.Tests
                 Name = "Json",
                 Uncompressed = "{ \"key\": \"value\" }",
                 Compressed = "㞀⁄ൠꘉ츁렐쀶ղ顀张",
-                CompressedBase64 = "456A4oGE4LWg6piJ7piF7LiB66CQ7IC21bLpoYDlvKA=",
+                CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA==",
                 CompressedUTF16 = "ᯠ࠱ǌ઀佐᝘ΐრᬢ峆ࠫ爠",
                 CompressedEncodedURIComponent = "%E3%9E%80%E2%81%84%E0%B5%A0%EA%98%89%EE%98%85%EC%B8%81%EB%A0%90%EC%80%B6%D5%B2%E9%A1%80%E5%BC%A0"
             };
@@ -26,7 +26,7 @@ namespace LZStringCSharp.Tests
                 Name = "UTF-8 String",
                 Uncompressed = "ユニコード",
                 Compressed = "駃⚘操ಃ錌䀀",
-                CompressedBase64 = "6aeD4pqY5pON4LKD74OI6YyM5ICA",
+                CompressedBase64 = "mcMmmGTNDIPwyJMMQAA=",
                 CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ ",
                 CompressedEncodedURIComponent = "%E9%A7%83%E2%9A%98%E6%93%8D%E0%B2%83%EF%83%88%E9%8C%8C%E4%80%80"
             };
@@ -75,9 +75,46 @@ namespace LZStringCSharp.Tests
         }
 
         [TestCaseSource(nameof(TestCases))]
-        public void NodeCompatible(LZStringTestCase test)
+        public void CompatibilityCompressBase64FromNode(LZStringTestCase test)
         {
-            Assert.That(RunNodeLzString(test.Uncompressed), Is.EqualTo(test.Uncompressed));
+            if(test.Name == "UTF-8 String")
+                Assert.Inconclusive("lz-string implementation seems broken for this test case");
+
+            var compress = RunNodeLzString("compressToBase64", test.Uncompressed);
+            string uncompress = null;
+            try
+            {
+                uncompress = LZString.DecompressFromBase64(compress);
+            }
+            catch (FormatException exc)
+            {
+                Assert.Fail($"Invalid Base64 string: '{compress}'{Environment.NewLine}{exc.Message}");
+            }
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityCompressBase64FromCSharp(LZStringTestCase test)
+        {
+            var compress = LZString.CompressToBase64(test.Uncompressed);
+            var uncompress = RunNodeLzString("decompressFromBase64", compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityCompressUTF16FromNode(LZStringTestCase test)
+        {
+            var compress = RunNodeLzString("compressToUTF16", test.Uncompressed);
+            var uncompress = LZString.DecompressFromUTF16(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityCompressUTF16FromCSharp(LZStringTestCase test)
+        {
+            var compress = LZString.CompressToUTF16(test.Uncompressed);
+            var uncompress = RunNodeLzString("decompressFromUTF16", compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
         }
 
         public struct LZStringTestCase
@@ -91,10 +128,11 @@ namespace LZStringCSharp.Tests
             public override string ToString() => Name;
         }
 
-        private static string RunNodeLzString(string value)
+        private static string RunNodeLzString(string fn, string value)
         {
-            var tempFile = Path.GetTempFileName();
-            File.WriteAllText(tempFile, value);
+            var inputTempFile = Path.GetTempFileName();
+            var outputTempFile = Path.GetTempFileName();
+            File.WriteAllText(inputTempFile, value);
             try
             {
                 var output = new StringBuilder();
@@ -109,7 +147,7 @@ namespace LZStringCSharp.Tests
                     {
                         WorkingDirectory = workingDirectory,
                         FileName = "cmd.exe",
-                        Arguments = $"cmd /C node -e \"var lzString = require('lz-string'); console.log(lzString.compress(fs.readFileSync('{tempFile.Replace("\\", "/")}', {{encoding: 'utf8'}})));\"",
+                        Arguments = $"cmd /C node -e \"var lzString = require('lz-string'); fs.writeFileSync('{outputTempFile.Replace('\\', '/')}', (lzString.{fn}(fs.readFileSync('{inputTempFile.Replace('\\', '/')}', {{encoding: 'utf8'}}))));\"",
                         UseShellExecute = false,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         CreateNoWindow = true,
@@ -129,12 +167,17 @@ namespace LZStringCSharp.Tests
 
                 if(error.Length > 4) // Two line breaks
                     Assert.Fail($"Node error: {error}");
-                return output.ToString();
+                var result = File.ReadAllText(outputTempFile);
+                if(string.IsNullOrEmpty(result))
+                    Assert.Fail($"lz-string did not write output. Full output: '{output}'");
+                return result;
             }
             finally
             {
-                if (File.Exists(tempFile))
-                    File.Delete(tempFile);
+                if (File.Exists(inputTempFile))
+                    File.Delete(inputTempFile);
+                if (File.Exists(outputTempFile))
+                    File.Delete(outputTempFile);
             }
         }
     }

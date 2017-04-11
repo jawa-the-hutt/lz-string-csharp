@@ -11,19 +11,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/christianrondeau/lz-string-csharp.git"
+    "url": "git+https://github.com/jawa-the-hutt/lz-string-csharp.git"
   },
   "keywords": [
     "lz-string",
     "csharp",
     "compression"
   ],
-  "author": "Christian Rondeau <christian.rondeau@gmail.com> (http://christianrondeau.net)",
+  "author": "jawa-the-hutt",
   "license": "Unlicense",
   "bugs": {
-    "url": "https://github.com/christianrondeau/lz-string-csharp/issues"
+    "url": "https://github.com/jawa-the-hutt/lz-string-csharp/issues"
   },
-  "homepage": "https://github.com/christianrondeau/lz-string-csharp#readme",
+  "homepage": "https://github.com/jawa-the-hutt/lz-string-csharp",
   "devDependencies": {
     "lz-string": "^1.4.4"
   }
