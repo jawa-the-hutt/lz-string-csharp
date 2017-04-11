@@ -8,7 +8,7 @@ Based on the LZ-String javascript found here:  http://pieroxy.net/blog/pages/lz-
 
 ## Installation
 
-- Add the NuGet package to your project: `Install-Package LZString`
+- Add the NuGet package to your project: `Install-Package LZStringCSharp`
 
 
 ## Please Note:
