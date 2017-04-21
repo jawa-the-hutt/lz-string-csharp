@@ -18,7 +18,7 @@ namespace LZStringCSharp.Tests
                 Compressed = "㞀⁄ൠꘉ츁렐쀶ղ顀张",
                 CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA==",
                 CompressedUTF16 = "ᯠ࠱ǌ઀佐᝘ΐრᬢ峆ࠫ爠",
-                CompressedEncodedURIComponent = "%E3%9E%80%E2%81%84%E0%B5%A0%EA%98%89%EE%98%85%EC%B8%81%EB%A0%90%EC%80%B6%D5%B2%E9%A1%80%E5%BC%A0"
+                CompressedEncodedURIComponent = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA"
             };
 
             yield return new LZStringTestCase
@@ -26,9 +26,9 @@ namespace LZStringCSharp.Tests
                 Name = "UTF-8 String",
                 Uncompressed = "ユニコード",
                 Compressed = "駃⚘操ಃ錌䀀",
-                CompressedBase64 = "mcMmmGTNDIPwyJMMQAA=",
-                CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ ",
-                CompressedEncodedURIComponent = "%E9%A7%83%E2%9A%98%E6%93%8D%E0%B2%83%EF%83%88%E9%8C%8C%E4%80%80"
+                CompressedBase64 = "mcMmmGTNDIPwyJMMQ===",
+                CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ",
+                CompressedEncodedURIComponent = "mcMmmGTNDIPwyJMMQ"
             };
         }
 
@@ -74,14 +74,42 @@ namespace LZStringCSharp.Tests
             Assert.That(LZString.CompressToEncodedURIComponent(test.Uncompressed), Is.EqualTo(test.CompressedEncodedURIComponent));
         }
 
-        [TestCaseSource(nameof(TestCases))]
-        public void CompatibilityCompressBase64FromNode(LZStringTestCase test)
-        {
-            if (test.Name == "UTF-8 String")
-                Assert.Inconclusive("lz-string implementation seems broken for this test case");
 
+        [TestCaseSource(nameof(TestCases))]
+        public void DecompressFromEncodedURIComponent(LZStringTestCase test)
+        {
+            Assert.That(LZString.DecompressFromEncodedURIComponent(test.CompressedEncodedURIComponent), Is.EqualTo(test.Uncompressed));
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityDecompressEncodedURIComponentFromNode(LZStringTestCase test)
+        {
+            var compress = RunNodeLzString("compressToEncodedURIComponent", test.Uncompressed);
+            var uncompress = "";
+            try
+            {
+                uncompress = LZString.DecompressFromEncodedURIComponent(compress);
+            }
+            catch (FormatException exc)
+            {
+                Assert.Fail($"Invalid EncodedURIComponent string: '{compress}'{Environment.NewLine}{exc.Message}");
+            }
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityCompressEncodedURIComponentFromCSharp(LZStringTestCase test)
+        {
+            var compress = LZString.CompressToEncodedURIComponent(test.Uncompressed);
+            var uncompress = RunNodeLzString("decompressFromEncodedURIComponent", compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityDecompressBase64FromNode(LZStringTestCase test)
+        {
             var compress = RunNodeLzString("compressToBase64", test.Uncompressed);
-            string uncompress = "";
+            var uncompress = "";
             try
             {
                 uncompress = LZString.DecompressFromBase64(compress);
@@ -102,7 +130,7 @@ namespace LZStringCSharp.Tests
         }
 
         [TestCaseSource(nameof(TestCases))]
-        public void CompatibilityCompressUTF16FromNode(LZStringTestCase test)
+        public void CompatibilityDecompressUTF16FromNode(LZStringTestCase test)
         {
             var compress = RunNodeLzString("compressToUTF16", test.Uncompressed);
             var uncompress = LZString.DecompressFromUTF16(compress);
