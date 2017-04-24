@@ -1,6 +1,6 @@
 {
   "name": "lz-string-csharp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "lz-string c# implementation",
   "main": "index.js",
   "directories": {
