@@ -392,7 +392,7 @@ namespace LZStringCSharp
 
             for (i = 0; i < 3; i += 1)
             {
-                dictionary.Add(i.ToString());
+                dictionary.Add(((char)i).ToString());
             }
 
             maxpower = (int)Math.Pow(2, 2);
@@ -537,7 +537,7 @@ namespace LZStringCSharp
                 }
                 else
                 {
-                    if (c == dictionary.Count)
+                    if (c2 == dictionary.Count)
                     {
                         entry = w + w[0];
                     }

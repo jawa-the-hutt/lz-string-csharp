@@ -30,6 +30,16 @@ namespace LZStringCSharp.Tests
                 CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ",
                 CompressedEncodedURIComponent = "mcMmmGTNDIPwyJMMQ"
             };
+
+            yield return new LZStringTestCase
+            {
+                Name = "Edge Case 1",
+                Uncompressed = "000",
+                Compressed = "̊\0",
+                CompressedBase64 = "Awo=",
+                CompressedUTF16 = "ƥ ",
+                CompressedEncodedURIComponent = "Awo"
+            };
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -74,7 +84,6 @@ namespace LZStringCSharp.Tests
             Assert.That(LZString.CompressToEncodedURIComponent(test.Uncompressed), Is.EqualTo(test.CompressedEncodedURIComponent));
         }
 
-
         [TestCaseSource(nameof(TestCases))]
         public void DecompressFromEncodedURIComponent(LZStringTestCase test)
         {
@@ -94,7 +103,9 @@ namespace LZStringCSharp.Tests
             {
                 Assert.Fail($"Invalid EncodedURIComponent string: '{compress}'{Environment.NewLine}{exc.Message}");
             }
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("lz-string compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -102,7 +113,9 @@ namespace LZStringCSharp.Tests
         {
             var compress = LZString.CompressToEncodedURIComponent(test.Uncompressed);
             var uncompress = RunNodeLzString("decompressFromEncodedURIComponent", compress);
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("c# compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -118,7 +131,9 @@ namespace LZStringCSharp.Tests
             {
                 Assert.Fail($"Invalid Base64 string: '{compress}'{Environment.NewLine}{exc.Message}");
             }
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("lz-string compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -126,7 +141,9 @@ namespace LZStringCSharp.Tests
         {
             var compress = LZString.CompressToBase64(test.Uncompressed);
             var uncompress = RunNodeLzString("decompressFromBase64", compress);
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("c# compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -134,7 +151,9 @@ namespace LZStringCSharp.Tests
         {
             var compress = RunNodeLzString("compressToUTF16", test.Uncompressed);
             var uncompress = LZString.DecompressFromUTF16(compress);
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("lz-string compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         [TestCaseSource(nameof(TestCases))]
@@ -142,7 +161,9 @@ namespace LZStringCSharp.Tests
         {
             var compress = LZString.CompressToUTF16(test.Uncompressed);
             var uncompress = RunNodeLzString("decompressFromUTF16", compress);
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed), $"Compression result: {compress}");
+            Console.WriteLine("c# compression result:");
+            Console.WriteLine(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
         public struct LZStringTestCase
