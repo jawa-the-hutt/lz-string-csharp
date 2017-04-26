@@ -11,7 +11,7 @@
 		<!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>LZ String C# Compression Library</description>
-		<releaseNotes>Updated Namespace to be less confusing, Added URI Encode/Decode Methods</releaseNotes>
+		<releaseNotes>Update C# Implementation more closely match and work with lz-string 1.4.4 JS package</releaseNotes>
 		<tags>compression lz</tags>
 	</metadata>
 </package>
