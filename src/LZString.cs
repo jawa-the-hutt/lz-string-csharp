@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,19 +14,17 @@ namespace LZStringCSharp
     {
         private const string KeyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
         private const string KeyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
-        private static readonly Dictionary<string, Dictionary<char, char>> BaseReverseDict = new Dictionary<string, Dictionary<char, char>>();
+        private static readonly IDictionary<char, char> KeyStrBase64Dict = CreateBaseDict(KeyStrBase64);
+        private static readonly IDictionary<char, char> KeyStrUriSafeDict = CreateBaseDict(KeyStrUriSafe);
 
-        private static char GetBaseValue(string alphabet, char character)
+        private static IDictionary<char, char> CreateBaseDict(string alphabet)
         {
-            if (!BaseReverseDict.ContainsKey(alphabet))
+            var dict = new ConcurrentDictionary<char, char>();
+            for (var i = 0; i < alphabet.Length; i++)
             {
-                BaseReverseDict[alphabet] = new Dictionary<char, char>();
-                for (var i = 0; i < alphabet.Length; i++)
-                {
-                    BaseReverseDict[alphabet][alphabet[i]] = (char)i;
-                }
+                dict[alphabet[i]] = (char)i;
             }
-            return BaseReverseDict[alphabet][character];
+            return dict;
         }
 
         public static string CompressToBase64(string input)
@@ -47,7 +46,7 @@ namespace LZStringCSharp
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            return Decompress(input.Length, 32, index => GetBaseValue(KeyStrBase64, input[index]));
+            return Decompress(input.Length, 32, index => KeyStrBase64Dict[input[index]]);
         }
 
         public static string CompressToUTF16(string input)
@@ -74,7 +73,7 @@ namespace LZStringCSharp
             if (input == null) throw new ArgumentNullException(nameof(input));
 
             input = input.Replace(" ", "+");
-            return Decompress(input.Length, 32, index => GetBaseValue(KeyStrUriSafe, input[index]));
+            return Decompress(input.Length, 32, index => KeyStrUriSafeDict[input[index]]);
         }
 
         public static string Compress(string uncompressed)
