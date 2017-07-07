@@ -166,6 +166,43 @@ namespace LZStringCSharp.Tests
             Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
 
+        [Test]
+        [Explicit]
+        public void CompressToBase64Performance()
+        {
+            var value = new string('x', 65536);
+            LZString.CompressToBase64(value); // Warmup
+
+            var timer = new Stopwatch();
+            timer.Start();
+            const int times = 1024;
+
+            for (var i = 0; i < times; i++)
+                LZString.CompressToBase64(value);
+
+            timer.Stop();
+            Assert.Pass($"Did {times} compressions in {timer.Elapsed.TotalSeconds}s. Average: {timer.ElapsedMilliseconds / times}ms");
+        }
+        
+        [Test]
+        [Explicit]
+        public void DecompressFromBase64Performance()
+        {
+            var value = new string('x', 65536);
+            value = LZString.CompressToBase64(value);
+            LZString.DecompressFromBase64(value); // Warmup
+
+            var timer = new Stopwatch();
+            timer.Start();
+            const int times = 1024;
+
+            for (var i = 0; i < times; i++)
+                LZString.DecompressFromBase64(value);
+
+            timer.Stop();
+            Assert.Pass($"Did {times} decompressions in {timer.Elapsed.TotalSeconds}s. Average: {timer.ElapsedMilliseconds / times}ms");
+        }
+
         public struct LZStringTestCase
         {
             public string Name;
@@ -223,10 +260,10 @@ namespace LZStringCSharp.Tests
             }
             finally
             {
-                //if (File.Exists(inputTempFile))
-                    //File.Delete(inputTempFile);
-                //if (File.Exists(outputTempFile))
-                    //File.Delete(outputTempFile);
+                if (File.Exists(inputTempFile))
+                    File.Delete(inputTempFile);
+                if (File.Exists(outputTempFile))
+                    File.Delete(outputTempFile);
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +18,7 @@ namespace LZStringCSharp
 
         private static IDictionary<char, char> CreateBaseDict(string alphabet)
         {
-            var dict = new ConcurrentDictionary<char, char>();
+            var dict = new Dictionary<char, char>();
             for (var i = 0; i < alphabet.Length; i++)
             {
                 dict[alphabet[i]] = (char)i;
