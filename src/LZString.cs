@@ -140,7 +140,7 @@ namespace LZStringCSharp
                 {
                     if (context_dictionaryToCreate.ContainsKey(context_w))
                     {
-                        if (context_w.FirstOrDefault() < 256)
+                        if (FirstOrDefault(context_w) < 256)
                         {
                             for (i = 0; i < context_numBits; i++)
                             {
@@ -156,7 +156,7 @@ namespace LZStringCSharp
                                     context_data_position++;
                                 }
                             }
-                            value = context_w.FirstOrDefault();
+                            value = FirstOrDefault(context_w);
                             for (i = 0; i < 8; i++)
                             {
                                 context_data_val = (context_data_val << 1) | (value & 1);
@@ -191,7 +191,7 @@ namespace LZStringCSharp
                                 }
                                 value = 0;
                             }
-                            value = context_w.FirstOrDefault();
+                            value = FirstOrDefault(context_w);
                             for (i = 0; i < 16; i++)
                             {
                                 context_data_val = (context_data_val << 1) | (value & 1);
@@ -254,7 +254,7 @@ namespace LZStringCSharp
             {
                 if (context_dictionaryToCreate.ContainsKey(context_w))
                 {
-                    if (context_w.FirstOrDefault() < 256)
+                    if (FirstOrDefault(context_w) < 256)
                     {
                         for (i = 0; i < context_numBits; i++)
                         {
@@ -270,7 +270,7 @@ namespace LZStringCSharp
                                 context_data_position++;
                             }
                         }
-                        value = context_w.FirstOrDefault();
+                        value = FirstOrDefault(context_w);
                         for (i = 0; i < 8; i++)
                         {
                             context_data_val = (context_data_val << 1) | (value & 1);
@@ -305,7 +305,7 @@ namespace LZStringCSharp
                             }
                             value = 0;
                         }
-                        value = context_w.FirstOrDefault();
+                        value = FirstOrDefault(context_w);
                         for (i = 0; i < 16; i++)
                         {
                             context_data_val = (context_data_val << 1) | (value & 1);
@@ -354,7 +354,7 @@ namespace LZStringCSharp
                 context_enlargeIn--;
                 if (context_enlargeIn == 0)
                 {
-                    context_enlargeIn = (int)Math.Pow(2, context_numBits);
+                    // context_enlargeIn = (int)Math.Pow(2, context_numBits); // Value is never used anymore
                     context_numBits++;
                 }
             }
@@ -386,7 +386,7 @@ namespace LZStringCSharp
                     context_data.Append(getCharFromInt(context_data_val));
                     break;
                 }
-                else context_data_position++;
+                context_data_position++;
             }
             return context_data.ToString();
         }
@@ -404,10 +404,8 @@ namespace LZStringCSharp
             var dictionary = new List<string>();
             var enlargeIn = 4;
             var numBits = 3;
-            string entry;
             var result = new StringBuilder();
             int i;
-            string w;
             int bits = 0, resb, maxpower, power;
             var c = '\0';
 
@@ -476,7 +474,7 @@ namespace LZStringCSharp
                 case 2:
                     return "";
             }
-            w = c.ToString();
+            var w = c.ToString();
             dictionary.Add(w);
             result.Append(c);
             while (true)
@@ -556,6 +554,8 @@ namespace LZStringCSharp
                     numBits++;
                 }
 
+                string entry;
+
                 if (dictionary.Count - 1 >= c2)
                 {
                     entry = dictionary[c2];
@@ -585,6 +585,16 @@ namespace LZStringCSharp
                     numBits++;
                 }
             }
+        }
+
+        private static char FirstOrDefault(string value)
+        {
+            if(string.IsNullOrEmpty(value))
+            {
+                return default(char);
+            }
+
+            return value[0];
         }
     }
 }
