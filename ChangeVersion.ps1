@@ -19,7 +19,7 @@ Function AssignVersionToFile {
 	(Get-Content $Path) -Replace $RegEx, $Replacement | Out-File $Path -Encoding UTF8
 }
 
-AssignVersionToFile -Path "$PSScriptRoot\src\LZStringCSharp.csproj" -RegEx "Version>\d+\.\d+\.\d+" -Replacement "Version>$($Version)</"
+AssignVersionToFile -Path "$PSScriptRoot\src\LZStringCSharp.csproj" -RegEx "Version>\d+\.\d+\.\d+" -Replacement "Version>$($Version)"
 AssignVersionToFile -Path "$PSScriptRoot\package.json" -RegEx "`"version`": `"[^`"]+`""-Replacement "`"version`": `"$($Version)`""
 
 Write-Host "Version updated!" -ForegroundColor Green
