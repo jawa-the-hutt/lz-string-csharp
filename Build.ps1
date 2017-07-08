@@ -3,22 +3,20 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Building LzString..." -ForegroundColor Green
 
-# ==================================== Functions
+# ==================================== Setup
 
-Function GetMSBuildExe {
-	[CmdletBinding()]
-	$DotNetVersion = "14.0"
-	$RegKey = "HKLM:\software\Microsoft\MSBuild\ToolsVersions\$DotNetVersion"
-	$RegProperty = "MSBuildToolsPath"
-	$MSBuildExe = Join-Path -Path (Get-ItemProperty $RegKey).$RegProperty -ChildPath "msbuild.exe"
-	Return $MSBuildExe
+Install-Module VSSetup -Scope CurrentUser
+$MSBuildExe = "$((Get-VSSetupInstance).InstallationPath)\MSBuild\15.0\Bin\MSBuild.exe"
+If(-not (Test-Path $MSBuildExe)) {
+	Throw "Could not find MSBuild 15.0"
 }
+Write-Host "Using MSBuild 15.0 at: $MSBuildExe"
 
 # ==================================== Variables
 
 $NuGet = "$PSScriptRoot\.nuget\NuGet.exe"
-$BuildPath = "$PSScriptRoot\src\bin\Release"
 $CSProjPath = "$PSScriptRoot\src\LZStringCSharp.csproj"
+$BuildPath = "$PSScriptRoot\src\bin\Release\netstandard1.0"
 
 # ==================================== Build
 
@@ -28,8 +26,9 @@ If(Test-Path -Path $BuildPath) {
 
 &($NuGet) restore
 
-&(GetMSBuildExe) lz-string-csharp.sln `
-	/t:Clean`;Rebuild `
+&($MSBuildExe) .\src\LZStringCSharp.csproj `
+	/t:pack `
+	/tv:15.0 `
 	/p:Configuration=Release `
 	/p:AllowedReferenceRelatedFileExtensions=- `
 	/p:DebugSymbols=false `
@@ -37,4 +36,4 @@ If(Test-Path -Path $BuildPath) {
 	/clp:ErrorsOnly `
 	/v:m
 
-&($NuGet) pack $CSProjPath -Prop Configuration=Release
+Write-Host "Output NuGet package can be found in .\src\bin\Release\LZStringCSharp.(version).nupkg"
