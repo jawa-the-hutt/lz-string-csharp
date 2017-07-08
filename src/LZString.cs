@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace LZStringCSharp
@@ -354,7 +353,7 @@ namespace LZStringCSharp
                 context_enlargeIn--;
                 if (context_enlargeIn == 0)
                 {
-                    // context_enlargeIn = (int)Math.Pow(2, context_numBits); // Value is never used anymore
+                    // context_enlargeIn = (int)Math.Pow(2, context_numBits); // Unused. Kept for tracking changes with https://github.com/pieroxy/lz-string/blob/master/libs/lz-string.js#L295
                     context_numBits++;
                 }
             }
@@ -386,7 +385,7 @@ namespace LZStringCSharp
                     context_data.Append(getCharFromInt(context_data_val));
                     break;
                 }
-                context_data_position++;
+                else context_data_position++;
             }
             return context_data.ToString();
         }
@@ -404,8 +403,10 @@ namespace LZStringCSharp
             var dictionary = new List<string>();
             var enlargeIn = 4;
             var numBits = 3;
+            string entry;
             var result = new StringBuilder();
             int i;
+            string w;
             int bits = 0, resb, maxpower, power;
             var c = '\0';
 
@@ -474,7 +475,7 @@ namespace LZStringCSharp
                 case 2:
                     return "";
             }
-            var w = c.ToString();
+            w = c.ToString();
             dictionary.Add(w);
             result.Append(c);
             while (true)
@@ -553,8 +554,6 @@ namespace LZStringCSharp
                     enlargeIn = (int)Math.Pow(2, numBits);
                     numBits++;
                 }
-
-                string entry;
 
                 if (dictionary.Count - 1 >= c2)
                 {
