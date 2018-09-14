@@ -224,7 +224,7 @@ namespace LZStringCSharp.Tests
                 var output = new StringBuilder();
                 var error = new StringBuilder();
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var workingDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory), "../../"));
+                var workingDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(TestContext.CurrentContext.TestDirectory), "../../../"));
                 if (!Directory.Exists(Path.Combine(workingDirectory, "node_modules", "lz-string")))
                     Assert.Inconclusive( $"lz-string is not installed. Use `npm install` in `{workingDirectory}` and re-run tests.");
                 using (var process = new Process
