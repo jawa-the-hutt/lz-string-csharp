@@ -74,6 +74,33 @@ namespace LZStringCSharp
             input = input.Replace(" ", "+");
             return Decompress(input.Length, 32, index => KeyStrUriSafeDict[input[index]]);
         }
+        
+        public static byte[] CompressToUint8Array(string uncompressed)
+        {
+            string compressed = Compress(uncompressed);
+            byte[] buf = new byte[compressed.Length * 2];
+
+            for (int i = 0; i < compressed.Length; i++)
+            {
+                int current_value = Convert.ToInt32(compressed[i]);
+                buf[i * 2] = (byte)(current_value >> 8);
+                buf[i * 2 + 1] = (byte)(current_value % 256);
+            }
+            return buf;
+        }
+
+        public static string DecompressFromUint8Array(byte[] compressed)
+        {
+            if (compressed == null) throw new ArgumentNullException(nameof(compressed));
+
+            char[] result = new char[compressed.Length / 2];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Convert.ToChar(compressed[i * 2] * 256 + compressed[i * 2 + 1]);
+            }
+
+            return Decompress(new string(result));
+        }
 
         public static string Compress(string uncompressed)
         {
