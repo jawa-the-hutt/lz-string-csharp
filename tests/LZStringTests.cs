@@ -18,7 +18,8 @@ namespace LZStringCSharp.Tests
                 Compressed = "㞀⁄ൠꘉ츁렐쀶ղ顀张",
                 CompressedBase64 = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA==",
                 CompressedUTF16 = "ᯠ࠱ǌ઀佐᝘ΐრᬢ峆ࠫ爠",
-                CompressedEncodedURIComponent = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA"
+                CompressedEncodedURIComponent = "N4AgRA1gpgnmBc4BuBDANgVymEBfIA",
+                CompressedUInt8Array = new byte[] { 55, 128, 32, 68, 13, 96, 166, 9, 230, 5, 206, 1, 184, 16, 192, 54, 5, 114, 152, 64, 95, 32 }
             };
 
             yield return new LZStringTestCase
@@ -28,7 +29,8 @@ namespace LZStringCSharp.Tests
                 Compressed = "駃⚘操ಃ錌䀀",
                 CompressedBase64 = "mcMmmGTNDIPwyJMMQ===",
                 CompressedUTF16 = "䴁䧆ಹ僨ᾦ≬ᢠ",
-                CompressedEncodedURIComponent = "mcMmmGTNDIPwyJMMQ"
+                CompressedEncodedURIComponent = "mcMmmGTNDIPwyJMMQ",
+                CompressedUInt8Array = new byte[] { 153, 195, 38, 152, 100, 205, 12, 131, 240, 200, 147, 12, 64, 0 }
             };
 
             yield return new LZStringTestCase
@@ -38,7 +40,8 @@ namespace LZStringCSharp.Tests
                 Compressed = "̊\0",
                 CompressedBase64 = "Awo=",
                 CompressedUTF16 = "ƥ ",
-                CompressedEncodedURIComponent = "Awo"
+                CompressedEncodedURIComponent = "Awo",
+                CompressedUInt8Array = new byte[] { 3, 10, 0, 0 }
             };
         }
 
@@ -165,6 +168,22 @@ namespace LZStringCSharp.Tests
             Console.WriteLine(compress);
             Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
         }
+        
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityDecompressUInt8ArrayFromNode(LZStringTestCase test)
+        {
+            var compress = test.CompressedUInt8Array;
+            var uncompress = LZString.DecompressFromUint8Array(compress);
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
+        }
+
+        [TestCaseSource(nameof(TestCases))]
+        public void CompatibilityCompressUInt8ArrayFromCSharp(LZStringTestCase test)
+        {
+            var compress = LZString.CompressToUint8Array(test.Uncompressed);
+            var uncompress = test.Uncompressed;
+            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
+        }
 
         [Test]
         [Explicit]
@@ -211,6 +230,7 @@ namespace LZStringCSharp.Tests
             public string CompressedBase64;
             public string CompressedUTF16;
             public string CompressedEncodedURIComponent;
+            public byte[] CompressedUInt8Array;
             public override string ToString() => Name;
         }
 
