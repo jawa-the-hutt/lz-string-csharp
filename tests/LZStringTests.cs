@@ -181,8 +181,7 @@ namespace LZStringCSharp.Tests
         public void CompatibilityCompressUInt8ArrayFromCSharp(LZStringTestCase test)
         {
             var compress = LZString.CompressToUint8Array(test.Uncompressed);
-            var uncompress = test.Uncompressed;
-            Assert.That(uncompress, Is.EqualTo(test.Uncompressed));
+            CollectionAssert.AreEqual(compress, test.CompressedUInt8Array);
         }
 
         [Test]
