@@ -6,7 +6,7 @@ C# Class implementation of [lz-string](http://pieroxy.net/blog/pages/lz-string/i
 
 ## Installation
 
-- Install with NuGet: `Install-Package LZStringCSharp`, or;
+- Install with NuGet: `Install-Package LZStringCSharp`, or .NET Core CLI: `dotnet add package LZStringCSharp`;
 - Downloaded from the [Releases](https://github.com/jawa-the-hutt/lz-string-csharp/releases) page
 
 
