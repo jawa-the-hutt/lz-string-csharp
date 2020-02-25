@@ -6,7 +6,7 @@ Write-Host "Building LzString..." -ForegroundColor Green
 # ==================================== Setup
 
 Install-Module VSSetup -Scope CurrentUser
-$MSBuildExe = "$((Get-VSSetupInstance).InstallationPath)\MSBuild\15.0\Bin\MSBuild.exe"
+$MSBuildExe = "$((Get-VSSetupInstance).InstallationPath)\MSBuild\Current\Bin\MSBuild.exe"
 If(-not (Test-Path $MSBuildExe)) {
 	Throw "Could not find MSBuild 15.0"
 }
